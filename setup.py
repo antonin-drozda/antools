@@ -31,8 +31,7 @@ setup(
   license=ant.__license__, 
   classifiers=CLASSIFIERS,
   keywords=ant.KEYWORDS, 
-  py_module=['antools'],
-  packages=find_packages(exclude=('docs', 'docs.*', 'tests', 'venv')),
+  packages=find_packages(include=["antools", "antools.*"]),
   python_requires='>=3.6',
   install_requires=ant.PACKAGE_DEPENDENCY,
   zip_safe=False

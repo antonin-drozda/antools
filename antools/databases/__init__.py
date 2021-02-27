@@ -15,13 +15,15 @@ __organization__ = "Freelancer"
 __project__ = "Anton's Tools"
 __date__ = "27/02/2021"
 
-# %% IMPORT FILES
-import os
-import sys
-
-antools_folder = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-if not antools_folder in sys.path:
-    sys.path.append(antools_folder)
-
-# %% FILES IMPORT   
-from databases.postgres.postgres_connector import PostgreSQLConnector
+# =============================================================================
+# # %% IMPORT FILES
+# import os
+# import sys
+# 
+# antools_folder = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# if not antools_folder in sys.path:
+#     sys.path.append(antools_folder)
+# 
+# # %% FILES IMPORT   
+# from databases.postgres.postgres_connector import PostgreSQLConnector
+# =============================================================================
