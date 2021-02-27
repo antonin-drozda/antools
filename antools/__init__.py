@@ -34,5 +34,5 @@ __date__ = "27/02/2021"
 
 DESCRIPTION = "Library used as useful personal code keeper also open to the public"
 URL = "https://github.com/antonin-drozda"
-PACKAGE_DEPENDENCY = ['pandas >= 1.0.0']
+PACKAGE_DEPENDENCY = ['pandas >= 1.2.2', 'psycopg2 >= 2.8.6', 'sqlalchemy >= 1.3.23']
 KEYWORDS = ['antools']
