@@ -26,6 +26,7 @@ setup(
   version=ant.__version__,  
   description=ant.DESCRIPTION,  
   long_description=open('README.txt').read() + '\n\n' + open('CHANGELOG.txt').read(),
+  long_description_content_type='text/markdown',
   url=ant.URL,  
   license=ant.__license__, 
   classifiers=CLASSIFIERS,
