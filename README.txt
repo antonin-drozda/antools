@@ -19,6 +19,5 @@ TO BE DECIDED:
 ### Package Installation
 You can simply employ this project by executing 'pip install antools' in your Python interpreter.
 
-
 ## Authors
 * **Antonín Drozda** - adrozda.dev@gmail.com
