@@ -24,7 +24,7 @@ __contact__ = "adrozda.dev@gmail.com"
 __organization__ = "Freelancer"
 
 __project__ = "Anton's Tools"
-__version__ = "2021.2.0"
+__version__ = "2021.2.1"
 __copyright__ = "Copyright (C) 2021 Antonín Drozda"
 __license__= "MIT"
 __date__ = "27/02/2021"
