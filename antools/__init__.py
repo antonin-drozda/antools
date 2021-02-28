@@ -32,6 +32,6 @@ __date__ = "28/02/2021"
 
 # %% ADDITIONAL PYPI METADATA
 URL = "https://github.com/antonin-drozda"
-DESCRIPTION = "Library used as useful personal code keeper also open to the public"
+DESCRIPTION = "Private library which is also free to public use. Its purpose is to be useful code keeper."
 PACKAGE_DEPENDENCY = ['pandas >= 1.2.2', 'psycopg2 >= 2.8.6', 'sqlalchemy >= 1.3.23']
-KEYWORDS = ['antools']
+KEYWORDS = ['antools', 'database', 'postgres', 'logger', 'logging']

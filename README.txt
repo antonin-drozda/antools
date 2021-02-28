@@ -5,6 +5,7 @@
 
 Anton's Tools package contains methods for
 * databases -  connectors to various databases, executing queries, loading and saving pd.DataFrame
+* loggers - connectors for interactive logging
 
 ## Getting Started
 ### Dependencies
@@ -14,6 +15,9 @@ Databases:
 * pandas
 * psycopg2
 * sqlalchemy
+
+Loggers:
+* none
 
 ### Package Installation
 Installable using pip. Execute:

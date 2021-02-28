@@ -3,7 +3,7 @@ Change Log
 
 2021.2.3 (XXX)
 -------------------
-- XXX
+- Added WindowsBaseLogger Class enabling interactive logging in Windows OS
 
 2021.2.2 (27/02/2021)
 -------------------

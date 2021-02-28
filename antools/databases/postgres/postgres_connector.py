@@ -22,7 +22,6 @@ import pandas as pd
 import os
 from sqlalchemy import create_engine
 from configparser import ConfigParser 
-from typing import Tuple
 
 # %% FILE IMPORT
 
@@ -90,11 +89,11 @@ class PostgreSQLConnector:
     
     Notes
     --------       
-    @ author:  Antonín Drozda
+    @ author:  Antonín Drozda (https://github.com/antonin-drozda)
     @ created: 27/02/2021
     
     """
-    
+    s
     def __init__(self, db_username:str, db_password:str, ini_file:str, ini_db_section:str):
         """
         ...

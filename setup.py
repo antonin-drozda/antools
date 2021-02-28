@@ -8,7 +8,7 @@ import antools as ant
 CLASSIFIERS = [
     'Framework :: IDLE',
     'Topic :: Utilities',
-    'Development Status :: 1 - Planning',
+    'Development Status :: 3 - Alpha',
     'License :: OSI Approved :: MIT License',
     'Programming Language :: Python :: 3',
     'Programming Language :: Python :: 3.8',
@@ -36,3 +36,5 @@ setup(
   install_requires=ant.PACKAGE_DEPENDENCY,
   zip_safe=False
 )
+
+# packages=find_packages(include=["antools", "antools.*"])
