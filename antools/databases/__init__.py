@@ -15,5 +15,5 @@ __organization__ = "Freelancer"
 __project__ = "Anton's Tools"
 __date__ = "27/02/2021"
 
-# %% IMPORT FILES
+# %% FILE IMPORT
 from antools.databases.postgres.postgres_connector import PostgreSQLConnector

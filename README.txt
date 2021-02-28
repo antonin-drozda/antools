@@ -1,23 +1,29 @@
 # Antools - Anton's Tools
 
 ## Overview
-# Library used as useful personal code keeper also open to the public
+### Private library which is also free to public use. Its purpose is to be useful code keeper.
 
 Anton's Tools package contains methods for
-* TO BE DECIDED -  TO BE DECIDED
+* databases -  connectors to various databases, executing queries, loading and saving pd.DataFrame
 
 ## Getting Started
 ### Dependencies
 The antools package utilizes following libraries:
 
-Data analysis:
+Databases:
 * pandas
-
-TO BE DECIDED:
-* TO BE DECIDED
+* psycopg2
+* sqlalchemy
 
 ### Package Installation
-You can simply employ this project by executing 'pip install antools' in your Python interpreter.
+Installable using pip. Execute:
+```
+pip install antools
+```
 
 ## Authors
-* **Antonin Drozda** - adrozda.dev@gmail.com
+* **Antonín Drozda** - adrozda.dev@gmail.com
+
+## URLs
+* **GitHub** - https://github.com/antonin-drozda/antools
+* **Pypi** - https://pypi.org/project/antools/

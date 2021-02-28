@@ -10,8 +10,8 @@ ANTOOLS - ANTON'S TOOLS
             LinkedIn (https://linkedin.com/in/anton%C3%ADn-drozda-a372b116a/)                      
 @ license: MIT
 @ copyright: Copyright (C) 2021 Antonín Drozda
-@ date: 27/02/2021
-@ version: 2021.2.2
+@ date: 28/02/2021
+@ version: 2022.2.3
 
 Library used as useful personal code keeper also open to the public
 
@@ -24,14 +24,13 @@ __contact__ = "adrozda.dev@gmail.com"
 __organization__ = "Freelancer"
 
 __project__ = "Anton's Tools"
-__version__ = "2021.2.2"
+__version__ = "2021.2.3"
 __copyright__ = "Copyright (C) 2021 Antonín Drozda"
 __license__= "MIT"
-__date__ = "27/02/2021"
+__date__ = "28/02/2021"
 
 
 # %% ADDITIONAL PYPI METADATA
-
 URL = "https://github.com/antonin-drozda"
 DESCRIPTION = "Library used as useful personal code keeper also open to the public"
 PACKAGE_DEPENDENCY = ['pandas >= 1.2.2', 'psycopg2 >= 2.8.6', 'sqlalchemy >= 1.3.23']
