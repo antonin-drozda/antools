@@ -56,7 +56,7 @@ class WindowsBaseLogger:
     Methods
     -------
     _check_inputs(self)
-        Check validity of class inputs
+        Checks validity of class inputs during Class initialization
     _setup_logger(self)
         Creates logger and its environment
     _replace_traceback(self)

@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+TO BE FILLED
+-------------------
+- Adding DataTypeValidator
+
+
 2021.2.3 (28/02/2021)
 -------------------
 - Added WindowsBaseLogger Class enabling interactive logging in Windows OS
@@ -13,7 +18,7 @@ Change Log
 -------------------
 - Trying to solve not visible packaged via pip install version
 
-
 2021.2.0 (27/02/2021)
 -------------------
 - Project created
+- Added PostgreSQLConnector Class
