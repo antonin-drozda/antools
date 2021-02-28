@@ -71,7 +71,7 @@ class PostgreSQLConnector:
         Disconnects from the database
     execute_query(self, query:str, err_raise:bool = True) -> bool
         Executes query in the database
-    load_dataframe(self, query:str, err_raise:bool = True) -> Tuple[pd.DataFrame, str]
+    load_dataframe(self, query:str, err_raise:bool = True) -> pd.DataFrame
         Returns pd.DataFrame based on query execution       
     save_dataframe(self, df:pd.DataFrame, db_table:str, db_schema:str = None, if_exists:str = "fail", err_raise:bool = True) -> bool
         Saves pd.DataFrame in the database          
@@ -327,7 +327,7 @@ class PostgreSQLConnector:
                 return False
 
     
-    def load_dataframe(self, query:str, err_raise:bool = True) -> Tuple[pd.DataFrame, str]:
+    def load_dataframe(self, query:str, err_raise:bool = True) -> pd.DataFrame:
         """ Executes query in the database 
         
         Parameters
@@ -340,7 +340,6 @@ class PostgreSQLConnector:
         Returns
         ----------
         pd.DataFrame
-        pd.DataFrame info (number of rows, columns, memory_usage)
         
         Raises
         ----------
@@ -354,16 +353,16 @@ class PostgreSQLConnector:
             df = pd.read_sql(query, con=self._conn_PSYCOPG)
             
             # get dataframe info
-            df_memory = round(df.memory_usage(deep=True).sum()/(1024)**2, 5)
-            df_info = f"Downloaded table has {df.shape[0]} rows, {df.shape[1]} columns and takes {df_memory} MB of free space."
+            # df_memory = round(df.memory_usage(deep=True).sum()/(1024)**2, 5)
+            # df_info = f"Downloaded table has {df.shape[0]} rows, {df.shape[1]} columns and takes {df_memory} MB of free space."
             
-            return df, df_info
+            return df
 
         except:
             if err_raise:
                 raise SystemExit(f"DataFrame could not be loaded from following query! \n '{query}'")
             else:
-                return False, None
+                return False
 
 
     def save_dataframe(self, df:pd.DataFrame, db_table:str, db_schema:str = None, if_exists:str = "fail", err_raise:bool = True) -> bool:
