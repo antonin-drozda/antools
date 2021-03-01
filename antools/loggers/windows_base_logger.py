@@ -365,6 +365,8 @@ class WindowsBaseLogger:
         terminate : bool
             If True, performs SystemExit
         """
+        
+        # if script is terminated, include info automatically
         if terminate:
             add_info = True
             

@@ -53,6 +53,8 @@ class PostgreSQLConnector:
         Connection using <sqlalchemy> library        
     _cursor_PSYCOPG : class
         Cursor used for executing queries
+    _logger
+        Logger class from antools library
 
     Methods
     -------
@@ -93,8 +95,7 @@ class PostgreSQLConnector:
     @ created: 27/02/2021
     
     """
-    s
-    def __init__(self, db_username:str, db_password:str, ini_file:str, ini_db_section:str):
+    def __init__(self, db_username:str, db_password:str, ini_file:str, ini_db_section:str, logger:object):
         """
         ...
         
@@ -107,18 +108,22 @@ class PostgreSQLConnector:
         ini_file : str
             Path to the .ini file where db_name, hostname, and port is stored
         ini_db_section : str
-            Name of the section in <_ini_file> for relevant database            
+            Name of the section in <_ini_file> for relevant database      
+        logger : object
+            Logger class from antools library
         """        
         self.db_username = db_username
         self.db_password = db_password       
         self._ini_file = ini_file
         self._ini_db_section = ini_db_section
+        self._logger = logger
         
         # automatically reads properties from <_.ini_file>
         self._config_reader = ConfigParser()             
         self._read_properties()
         self._is_connected = False 
-         
+  
+        
     def _check_inputs(self):
         """Check validity of class inputs
         
@@ -156,6 +161,7 @@ class PostgreSQLConnector:
         # check if sections exist
         if not self._ini_db_section in self._config_reader.sections():
             raise ValueError(f"PostgreSQLConnector obtained invalid variable: <ini_db_section> = <{self._ini_db_section}>. It must be valid section in .ini file!")
+    
         
     def _read_properties(self):
         """Check validity of class inputs
@@ -209,6 +215,9 @@ class PostgreSQLConnector:
             if self._conn_PSYCOPG and self._conn_SQLACH:
                 self._is_connected = True
                 
+                if self._logger:
+                    self._logger.debug(self._logger.pfx() + f"Connection to the <{self.db_name}> database was sucessful!")
+            
         return self._is_connected
 
 
@@ -239,10 +248,15 @@ class PostgreSQLConnector:
             self.cursor_PSYCOPG = self.conn_PSYCOPG.cursor()  
             return self.conn_PSYCOPG
             
-        except:
+        except Exception as err:
             self._is_connected = False
             self.conn_PSYCOPG = None
-            raise SystemExit(f"PostgreSQLConnector was unable to connect to <{self.db_name}> database!")            
+            
+            if self._logger:
+                self._logger.exception(self._logger.pfx() + f"Connection to the <{self.db_name}> database was not sucessful!", terminate=True)      
+            
+            else:
+                raise SystemExit(f"Connection to the <{self.db_name}> database was not sucessful!")
             
     
     def _connect_with_SQLALCH(self):
@@ -267,13 +281,17 @@ class PostgreSQLConnector:
             self.conn_SQLALCH = self._sqlalch_engine.connect()
             return self.conn_SQLALCH
             
-        except:
+        except Exception as err:
             self._is_connected = False
             self.conn_SQLALCH = None
-            raise SystemExit(f"PostgreSQLConnector was unable to connect to <{self.db_name}> database!")
+            
+            if self._logger:
+                self._logger.exception(self._logger.pfx() + f"Connection to the <{self.db_name}> database was not sucessful!", terminate=True)      
+            
+            else:
+                raise SystemExit(f"Connection to the <{self.db_name}> database was not sucessful!")
             
             
-
     def disconnect(self):
         """Disconnects from the database        
         
@@ -290,6 +308,8 @@ class PostgreSQLConnector:
             self.conn_PSYCOPG.close()
             self.conn_SQLALCH.close()
             self._is_connected = False
+            if self._logger:
+                self._logger.debug(self._logger.pfx() + f"<{self.db_name}> database was disconnected!")
             
         return self.is_connected
 
@@ -318,10 +338,19 @@ class PostgreSQLConnector:
             self.connect()            
         try:
             self.cursor_PSYCOPG.execute(query)
+            if self._logger:
+                self._logger.debug(self._logger.pfx() + f"Following query has been executed: \n <{query}>!")
+                
             return True
-        except:
+        
+        except Exception as err:
             if err_raise:
-                raise SystemExit(f"Query could not be executed! \n '{query}'")
+                if self._logger:
+                    self._logger.exception(self._logger.pfx() + f"Following query could not been executed: \n <{query}>!", terminate=True)
+                else:
+                    raise SystemExit(f"Query could not been executed! \n '{query}' \n due to: {err}")
+                    
+                return False
             else:
                 return False
 
@@ -352,17 +381,25 @@ class PostgreSQLConnector:
             df = pd.read_sql(query, con=self._conn_PSYCOPG)
             
             # get dataframe info
-            # df_memory = round(df.memory_usage(deep=True).sum()/(1024)**2, 5)
-            # df_info = f"Downloaded table has {df.shape[0]} rows, {df.shape[1]} columns and takes {df_memory} MB of free space."
+            df_memory = round(df.memory_usage(deep=True).sum()/(1024)**2, 5)
+            df_info = f"Downloaded table has {df.shape[0]} rows, {df.shape[1]} columns and takes {df_memory} MB of free space."
             
+            if self._logger:
+                self._logger.debug(self._logger.pfx() + f"DataFrame from following query has been executed: \n <{query}>!")            
+                self._logger.debug(self._logger.pfx() + f"{df_info}")  
+                
             return df
 
-        except:
+        except Exception as err:
             if err_raise:
-                raise SystemExit(f"DataFrame could not be loaded from following query! \n '{query}'")
+                if self._logger:
+                    self._logger.exception(self._logger.pfx() + f"Following query has could not been executed: \n <{query}>!", terminate=True)
+                else:
+                    raise SystemExit(f"Query could not been executed! \n '{query}' \n due to: {err}")
+                    
+                return False
             else:
                 return False
-
 
     def save_dataframe(self, df:pd.DataFrame, db_table:str, db_schema:str = None, if_exists:str = "fail", err_raise:bool = True) -> bool:
         """ Executes query in the database 
@@ -400,11 +437,19 @@ class PostgreSQLConnector:
 
         try:
             df.to_sql(name=db_table, schema=db_schema, con=self._sqlalch_engine, if_exists=if_exists, method="multi")
+            
+            if self._logger:
+                self._logger.debug(self._logger.pfx() + f"DataFrame has been saved into {db_table} table!")            
             return True
-        except:
+            
+        except Exception as err:
             if err_raise:
-                raise SystemExit(f"Unfortunately, it was not possible to save the dataframe!  \n {df}")
+                if self._logger:
+                    self._logger.exception(self._logger.pfx() + f"Unfortunately, it was not possible to save the dataframe! \n {df}", terminate=True)
+                else:
+                    raise SystemExit(f"Unfortunately, it was not possible to save the dataframe! \n {df} \n due to: {err}")                    
+                return False
+            
             else:
                 return False
-
 # %% NOTES
