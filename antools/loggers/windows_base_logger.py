@@ -362,6 +362,9 @@ class WindowsBaseLogger:
         terminate : bool
             If True, performs SystemExit
         """
+        if terminate:
+            add_info = True
+            
         self.logger.exception(self._user_name + " : " + msg, exc_info=add_info)
         
         if terminate:
