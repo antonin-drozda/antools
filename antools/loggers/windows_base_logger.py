@@ -25,6 +25,7 @@ import sys
 import traceback
 from functools import wraps
 from IPython.core.interactiveshell import InteractiveShell
+from datetime import datetime
 
 # %% FILE IMPORT
 
@@ -147,8 +148,8 @@ class WindowsBaseLogger:
         # automatically check inputs and create logger during __init__ method
         self._check_inputs()
         self._setup_logger()
-                
 
+              
     def _check_inputs(self):        
         """Checks validity of class inputs during Class initialization
         
@@ -197,16 +198,18 @@ class WindowsBaseLogger:
         else:
             self.logger.setLevel("INFO")
         
+        now = datetime.now()
+        full_path = os.path.join(self._folder_path, self._logger_name, str(now.year), now.strftime('%B'))
         
         # if <folder> does not exist, create it
-        if not os.path.isdir(self._folder_path):
-            os.makedirs(self._folder_path)
+        if not os.path.isdir(full_path):
+            os.makedirs(full_path)
         
         # if Class with same name is called more than once, do not add handlers
         if len(self.logger.handlers) == 0:
             formatter = logging.Formatter("%(asctime)s : %(levelname)s : %(message)s", self._time_format)
                             
-            fh = logging.FileHandler(os.path.join(self._folder_path, f"{self._logger_name}.log"), mode='w')
+            fh = logging.FileHandler(os.path.join(full_path, f"{now.strftime('%B-%d-%Y')}.log"), mode='w')
             fh.setFormatter(formatter)
             self.logger.addHandler(fh)
         
