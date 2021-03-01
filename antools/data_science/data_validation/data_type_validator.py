@@ -24,8 +24,6 @@ __date__ = "28/02/2021"
 
 # %% CLASSES
 
-# !!! DRAFT
-
 class DataTypeValidator:
     r"""
     DataTypeValidor class helping to validate various data types and its attributes
@@ -39,14 +37,32 @@ class DataTypeValidator:
     Methods
     -------
     validate_str(self, user_input, min_len:int = None, max_len:int = None, only_ascii:bool = False) -> bool:
-        Validate string and on demand checks its length and if only first 128 ascii codes is used (no diacritics etc.)
+        Check if type of user_input is string and on demand checks its length and if only first 128 ascii codes is used (no diacritics etc.)
         
     validate_int(self, user_input, min_value:int = None, max_value:int = None) -> bool:
-        Validate integer and on demand checks its value
+        Check if type of user_input is integer and on demand checks its value
 
     validate_float(self, user_input, min_value:int = None, max_value:int = None) -> bool:
-        TO BE CONTINUED ...
-       
+        Check if type of user_input is integer and on demand checks its value
+
+    validate_complex(self, user_input) -> bool:
+        Check if type of user_input is complex number
+        
+    validate_bool(self, user_input) -> bool:
+        Check if type of user_input is boolean
+        
+    validate_bool(self, user_input) -> bool:
+        Check if type of user_input is boolean
+        
+    validate_list(self, user_input, min_len:int = None, max_len:int = None, no_duplicity:bool = False) -> bool:
+        Check if type of user_input is list and on demand check its length and fact is has no duplicities
+        
+    validate_set(self, user_input, min_len:int = None, max_len:int = None) -> bool:
+        Check if type of user_input is set and on demand check its length
+    
+    validate_dict(self, user_input, min_len:int = None, max_len:int = None, not_nested:bool = True) -> bool:
+        Check if type of user_input is dict and on demand check its length and fact is is not nested
+        
     Raises
     --------   
     None
@@ -61,12 +77,43 @@ class DataTypeValidator:
     @ created: 28/02/2021
     
     """    
+    
     def __init__(self):
+        """
+        ...
+        
+        Parameters
+        ----------
+        None
+            
+        """
+        
         pass
 
 
     def validate_str(self, user_input, min_len:int = None, max_len:int = None, only_ascii:bool = False) -> bool:
+        """ Check if type of user_input is string and on demand checks its length and if only first 128 ascii codes is used (no diacritics etc.)          
         
+        Parameters
+        ----------
+        user_input
+            Input which should be validated
+        min_len : int, optional
+            Minimum length of user_input (default None)
+        max_len : int, optional
+            Maximum length of user_input (default None)            
+        only_ascii : bool, optional
+            Set true for check that user_input is only in 128 ascii characters (default False) 
+        
+        Returns
+        ----------
+        Boolean if user_input is valid
+                
+        Raises
+        ----------
+        None
+            
+        """        
         if not isinstance (user_input, str):
             return False
         
@@ -86,7 +133,26 @@ class DataTypeValidator:
 
 
     def validate_int(self, user_input, min_value:int = None, max_value:int = None) -> bool:
+        """ Check if type of user_input is integer and on demand checks its value
         
+        Parameters
+        ----------
+        user_input
+            Input which should be validated
+        min_value : int, optional
+            Minimum value of user_input (default None)
+        max_value : int, optional
+            Maximum value of user_input (default None)            
+        
+        Returns
+        ----------
+        Boolean if user_input is valid
+                
+        Raises
+        ----------
+        None
+            
+        """        
         if not isinstance (user_input, int):
             return False
         
@@ -102,7 +168,26 @@ class DataTypeValidator:
 
 
     def validate_float(self, user_input, min_value:int = None, max_value:int = None) -> bool:
+        """ Check if type of user_input is integer and on demand checks its value          
         
+        Parameters
+        ----------
+        user_input
+            Input which should be validated
+        min_value : int, optional
+            Minimum value of user_input (default None)
+        max_value : int, optional
+            Maximum value of user_input (default None)  
+        
+        Returns
+        ----------
+        Boolean if user_input is valid
+                
+        Raises
+        ----------
+        None
+            
+        """          
         if not isinstance (user_input, float) and not isinstance (user_input, int):
             return False
         
@@ -116,20 +201,76 @@ class DataTypeValidator:
          
         return True    
 
+
     def validate_complex(self, user_input) -> bool:
+        """ Check if type of user_input is complex number  
         
+        Parameters
+        ----------
+        user_input
+            Input which should be validated
+        
+        Returns
+        ----------
+        Boolean if user_input is valid
+                
+        Raises
+        ----------
+        None
+            
+        """         
         if not isinstance (user_input, complex):
             return False
         
         return True
-        
+       
+    
     def validate_bool(self, user_input) -> bool:
+        """ Check if type of user_input is boolean 
+        
+        Parameters
+        ----------
+        user_input
+            Input which should be validated 
+        
+        Returns
+        ----------
+        Boolean if user_input is valid
+                
+        Raises
+        ----------
+        None
+            
+        """ 
         if not isinstance (user_input, bool):
             return False    
         
         return True
 
+
     def validate_list(self, user_input, min_len:int = None, max_len:int = None, no_duplicity:bool = False) -> bool:
+        """ Check if type of user_input is list and on demand check its length and fact is has no duplicities         
+        
+        Parameters
+        ----------
+        user_input
+            Input which should be validated
+        min_len : int, optional
+            Minimum length of user_input (default None)
+        max_len : int, optional
+            Maximum length of user_input (default None)            
+        no_duplicity : bool, optional
+            Set true for check that list has no duplicities
+        
+        Returns
+        ----------
+        Boolean if user_input is valid
+                
+        Raises
+        ----------
+        None
+            
+        """ 
         if not isinstance (user_input, list):
             return False    
         
@@ -147,7 +288,29 @@ class DataTypeValidator:
             
         return True
 
+
     def validate_set(self, user_input, min_len:int = None, max_len:int = None) -> bool:
+        """ Check if type of user_input is set and on demand check its length
+        
+        Parameters
+        ----------
+        user_input
+            Input which should be validated
+        min_len : int, optional
+            Minimum length of user_input (default None)
+        max_len : int, optional
+            Maximum length of user_input (default None)            
+        
+        Returns
+        ----------
+        Boolean if user_input is valid
+                
+        Raises
+        ----------
+        None
+        
+        """
+            
         if not isinstance (user_input, set):
             return False    
         
@@ -161,8 +324,30 @@ class DataTypeValidator:
             
         return True
 
+
     def validate_dict(self, user_input, min_len:int = None, max_len:int = None, not_nested:bool = True) -> bool:
+        """  Check if type of user_input is dict and on demand check its length and fact is is not nested
         
+        Parameters
+        ----------
+        user_input
+            Input which should be validated
+        min_len : int, optional
+            Minimum length of user_input (default None)
+        max_len : int, optional
+            Maximum length of user_input (default None)            
+        no_duplicity : bool, optional
+            Set true for check that dictiory is not nested (default False)
+        
+        Returns
+        ----------
+        Boolean if user_input is valid
+                
+        Raises
+        ----------
+        None
+        
+        """        
         if not isinstance (user_input, dict):
             return False    
         
