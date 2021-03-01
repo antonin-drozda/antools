@@ -1,10 +1,11 @@
 Change Log
 ==========
 
-TO BE FILLED
+2021.3.0 (01/03/2021)
 -------------------
-- Adding DataTypeValidator
-
+- DataTypeValidator has been Added
+- Logger folder system has been reworked
+- WindowsBaseLogger can be now implemented into PostgreSQLConnector
 
 2021.2.3 (28/02/2021)
 -------------------

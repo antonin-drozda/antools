@@ -11,7 +11,7 @@ ANTOOLS - ANTON'S TOOLS
 @ license: MIT
 @ copyright: Copyright (C) 2021 Antonín Drozda
 @ date: 28/02/2021
-@ version: 2022.2.3
+@ version: 2022.3.0
 
 Library used as useful personal code keeper also open to the public
 
@@ -24,7 +24,7 @@ __contact__ = "adrozda.dev@gmail.com"
 __organization__ = "Freelancer"
 
 __project__ = "Anton's Tools"
-__version__ = "2021.2.3"
+__version__ = "2021.3.0"
 __copyright__ = "Copyright (C) 2021 Antonín Drozda"
 __license__= "MIT"
 __date__ = "28/02/2021"
@@ -34,4 +34,4 @@ __date__ = "28/02/2021"
 URL = "https://github.com/antonin-drozda"
 DESCRIPTION = "Private library which is also free to public use. Its purpose is to be useful code keeper."
 PACKAGE_DEPENDENCY = ['pandas >= 1.2.2', 'psycopg2 >= 2.8.6', 'sqlalchemy >= 1.3.23']
-KEYWORDS = ['antools', 'database', 'postgres', 'logger', 'logging']
+KEYWORDS = ['antools', 'database', 'postgres', 'logger', 'logging', 'data science', 'data validation']
