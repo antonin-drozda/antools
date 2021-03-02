@@ -385,7 +385,7 @@ class PostgreSQLConnector:
             df_info = f"Downloaded table has {df.shape[0]} rows, {df.shape[1]} columns and takes {df_memory} MB of free space."
             
             if self._logger:
-                self._logger.debug(self._logger.pfx() + f"DataFrame from following query has been executed: \n <{query}>!")            
+                self._logger.debug(self._logger.pfx() + f"DataFrame from following query has been loaded: \n <{query}>!")            
                 self._logger.debug(self._logger.pfx() + f"{df_info}")  
                 
             return df
@@ -393,7 +393,7 @@ class PostgreSQLConnector:
         except Exception as err:
             if err_raise:
                 if self._logger:
-                    self._logger.exception(self._logger.pfx() + f"Following query has could not been executed: \n <{query}>!", terminate=True)
+                    self._logger.exception(self._logger.pfx() + f"Following query could not been executed: \n <{query}>!", terminate=True)
                 else:
                     raise SystemExit(f"Query could not been executed! \n '{query}' \n due to: {err}")
                     
