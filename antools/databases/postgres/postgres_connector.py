@@ -95,7 +95,7 @@ class PostgreSQLConnector:
     @ created: 27/02/2021
     
     """
-    def __init__(self, db_username:str, db_password:str, ini_file:str, ini_db_section:str, logger:object):
+    def __init__(self, db_username:str, db_password:str, ini_file:str, ini_db_section:str, logger:object = None):
         """
         ...
         
@@ -110,7 +110,7 @@ class PostgreSQLConnector:
         ini_db_section : str
             Name of the section in <_ini_file> for relevant database      
         logger : object
-            Logger class from antools library
+            Logger class from antools library (default None)
         """        
         self.db_username = db_username
         self.db_password = db_password       
