@@ -10,8 +10,8 @@ ANTOOLS - ANTON'S TOOLS
             LinkedIn (https://linkedin.com/in/anton%C3%ADn-drozda-a372b116a/)                      
 @ license: MIT
 @ copyright: Copyright (C) 2021 Antonín Drozda
-@ date: 28/02/2021
-@ version: 2022.3.0
+@ date: 03/03/2021
+@ version: 2021.3.0
 
 Library used as useful personal code keeper also open to the public
 
@@ -27,7 +27,7 @@ __project__ = "Anton's Tools"
 __version__ = "2021.3.0"
 __copyright__ = "Copyright (C) 2021 Antonín Drozda"
 __license__= "MIT"
-__date__ = "28/02/2021"
+__date__ = "03/03/2021"
 
 
 # %% ADDITIONAL PYPI METADATA
