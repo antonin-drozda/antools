@@ -16,4 +16,4 @@ __project__ = "Anton's Tools"
 __date__ = "25/03/2021"
 
 # %% FILE IMPORT
-from antools.loggers.logger_class import logger
+from antools.logging.logger_class import logger
