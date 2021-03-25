@@ -4,7 +4,7 @@ POSTGRESQL CONNECTOR CLASS
 @ author: Antonín Drozda
 @ organization: Freelancer
 @ project: Anton's Tools
-@ date: 27/02/2021
+@ date: 25/03/2021
 
 Connector used for communicating with PostgreSQL database.
 """
@@ -14,37 +14,36 @@ __title__ = "POSTGRESQL CONNECTOR CLASS"
 __author__ = "Antonín Drozda"
 __organization__ = "Freelancer"
 __project__ = "Anton's Tools"
-__date__ = "27/02/2021"
+__date__ = "25/03/2021"
 
 # %% LIBRARY IMPORT
 import psycopg2
 import pandas as pd
-import os
-from sqlalchemy import create_engine
-from configparser import ConfigParser 
+from sqlalchemy import create_engine 
 
 # %% FILE IMPORT
+from antools.logging import logger
 
 # %% INPUTS
 
 # %% CLASSES
-class PostgreSQLConnector:
+class PostgreSQLConnector():
     """ Connector used for communication with PostgreSQL database
     
     ...
 
     Attributes
     ----------
-    db_username : str
-        Username credential for database connection
-    db_password : str
-        Password used for database connection
-    _ini_file : str
-        Path to the .ini file where db_name, hostname, and port is stored
-    _ini_db_section : str
-        Name of the section in <_ini_file> for relevant database
-    _config_reader : class
-        Class used for reading .ini files
+    database : str
+        Name of the database
+    user : str,
+        Name of the user
+    password : str
+        Password for database connection
+    server : str
+        Server name (default 'localhost')
+    port : str or int
+        Port for connection
     _is_connected : bool
         Boolean value storing info about PostgreSQLConnector connection
     _conn_PSYCOPG : class
@@ -53,15 +52,12 @@ class PostgreSQLConnector:
         Connection using <sqlalchemy> library        
     _cursor_PSYCOPG : class
         Cursor used for executing queries
-    _logger
-        Logger class from antools library
+
 
     Methods
     -------
     _check_inputs(self)
         Check validity of class inputs
-    _read_properties(self)
-        Read database properties from <_ini_file>
     connect(self) -> bool
         Connects to the database
     _connect_with_PSYCOPG(self)
@@ -92,38 +88,24 @@ class PostgreSQLConnector:
     Notes
     --------       
     @ author:  Antonín Drozda (https://github.com/antonin-drozda)
-    @ created: 27/02/2021
+    @ created: 25/03/2021   
     
     """
-    def __init__(self, db_username:str, db_password:str, ini_file:str, ini_db_section:str, logger:object = None):
-        """
-        ...
+    
+    def __init__(self, database:str, user:str, password:str,
+                     server:str = 'localhost', port:str or int = '5432'):
         
-        Parameters
-        ----------
-        db_username : str
-            Username credential for database connection
-        db_password : str
-            Password used for database connection
-        ini_file : str
-            Path to the .ini file where db_name, hostname, and port is stored
-        ini_db_section : str
-            Name of the section in <_ini_file> for relevant database      
-        logger : object
-            Logger class from antools library (default None)
-        """        
-        self.db_username = db_username
-        self.db_password = db_password       
-        self._ini_file = ini_file
-        self._ini_db_section = ini_db_section
-        self._logger = logger
+        self.database = database
+        self.user = user
+        self.password = password
+        self.server = server
+        self.port = port
+    
+        self._check_inputs()
+        self._is_connected = False
+        self.connect()
         
-        # automatically reads properties from <_.ini_file>
-        self._config_reader = ConfigParser()             
-        self._read_properties()
-        self._is_connected = False 
-  
-        
+    
     def _check_inputs(self):
         """Check validity of class inputs
         
@@ -137,59 +119,31 @@ class PostgreSQLConnector:
             If any inputs does not correspond to its intended data type.
             
         """
-        
-        # check if db_username is string
-        if not isinstance (self.db_username, str): 
-            raise ValueError(f"PostgreSQLConnector obtained invalid variable: <db_username> = <{self.db_username}>. It must be a string!")
 
-        # check if db_username is string
-        if not isinstance (self.db_password, str): 
-            raise ValueError(f"PostgreSQLConnector obtained invalid variable: <db_password> = <{self.db_password}>. It must be a string!")
             
-        # check if file exist
-        if not os.path.isfile(self._ini_file):   
-            raise ValueError(f"PostgreSQLConnector obtained invalid variable: <ini_file> = <{self._ini_file}>.It must be system path to the .ini file!")
-            
-        
-        # check if file type is .ini
-        if not self._ini_file.endswith(".ini"):
-            raise ValueError(f"PostgreSQLConnector obtained invalid variable: <ini_file> = <{self._ini_file}>. It must be system path to the .ini file!")
-        
-        # read file
-        self._config_reader.read(self._ini_file)
-        
-        # check if sections exist
-        if not self._ini_db_section in self._config_reader.sections():
-            raise ValueError(f"PostgreSQLConnector obtained invalid variable: <ini_db_section> = <{self._ini_db_section}>. It must be valid section in .ini file!")
-    
-        
-    def _read_properties(self):
-        """Check validity of class inputs
-        
-        Parameters
-        ----------
-        None
-        
-        Raises
-        ----------
-        KeyError
-            If ConfigReader cannot obtain some of the database credentials
-            If ini file does not contain db_hostname, db_port or db_name
-            
-        """        
-        # checks if inputs are vald before reading ini file
-        self._check_inputs()
-        
-        # try to read properties
-        try:
-            self.db_hostname = self._config_reader.get(self._ini_db_section, 'hostname')
-            self.db_port = self._config_reader.get(self._ini_db_section, 'port')
-            self.db_name = self._config_reader.get(self._ini_db_section, 'database')
-            
-        except:
-            raise KeyError(f"File <{self._ini_file}> for connecting to PostgreSQL database does not contains mandatory parameters<{self._ini_section}>!")
+        # check if database is string
+        if not isinstance (self.database, str): 
+            raise ValueError(f"PostgreSQLConnector obtained invalid variable: <database> = <{self.database}>. It must be a string!")
 
-    
+        # check if user is string
+        if not isinstance (self.user, str): 
+            raise ValueError(f"PostgreSQLConnector obtained invalid variable: <user> = <{self.user}>. It must be a string!")
+
+        # check if password is string
+        if not isinstance (self.password, str): 
+            raise ValueError("PostgreSQLConnector obtained invalid variable: <password> = <XXX>. It must be a string!")
+
+        # check if server is string
+        if not isinstance (self.server, str): 
+            raise ValueError(f"PostgreSQLConnector obtained invalid variable: <server> = <{self.server}>. It must be a string!")
+
+        # check if port is can be integer
+            try:
+                self.port = int(self.port)
+            except ValueError:
+                raise ValueError(f"PostgreSQLConnector obtained invalid variable: <port> = <{self.port}>. It cannot be transformed into integer!")
+                
+                
     def connect(self) -> bool:  
         """ Connects to the database          
         
@@ -214,9 +168,8 @@ class PostgreSQLConnector:
 
             if self._conn_PSYCOPG and self._conn_SQLACH:
                 self._is_connected = True
-                
-                if self._logger:
-                    self._logger.debug(self._logger.pfx() + f"Connection to the <{self.db_name}> database was sucessful!")
+
+            logger.info(f"Connection to the <{self.database}> database was sucessful!")
             
         return self._is_connected
 
@@ -238,26 +191,21 @@ class PostgreSQLConnector:
             If it was not possible to connect
         """
         try:
-            self.conn_PSYCOPG = psycopg2.connect(host=self.db_hostname, 
-                                        port=self.db_port, 
-                                        database=self.db_name,
-                                        user=self.db_username,
-                                        password=self.db_password)
+            self.conn_PSYCOPG = psycopg2.connect(host=self.server, 
+                                        port=self.port, 
+                                        database=self.database,
+                                        user=self.user,
+                                        password=self.password)
                
             self.conn_PSYCOPG.autocommit = True
             self.cursor_PSYCOPG = self.conn_PSYCOPG.cursor()  
             return self.conn_PSYCOPG
             
-        except Exception as err:
+        except Exception:
             self._is_connected = False
             self.conn_PSYCOPG = None
-            
-            if self._logger:
-                self._logger.exception(self._logger.pfx() + f"Connection to the <{self.db_name}> database was not sucessful!", terminate=True)      
-            
-            else:
-                raise SystemExit(f"Connection to the <{self.db_name}> database was not sucessful!")
-            
+            logger.exception(f"Connection to the <{self.database}> database was not sucessful!", terminate=True)      
+
     
     def _connect_with_SQLALCH(self):
         """ Connects to the database using sqlalchemy library         
@@ -276,21 +224,16 @@ class PostgreSQLConnector:
             If it was not possible to connect
         """
         try:
-            self._sqlalch_engine = create_engine(f"postgresql://{self.db_username}:{self.db_password}@{self.db_hostname}:{self.db_port}/{self.db_name}",
+            self._sqlalch_engine = create_engine(f"postgresql://{self.user}:{self.password}@{self.server}:{self.port}/{self.database}",
                                     connect_args={'connect_timeout': 3})
             self.conn_SQLALCH = self._sqlalch_engine.connect()
             return self.conn_SQLALCH
             
-        except Exception as err:
+        except Exception:
             self._is_connected = False
             self.conn_SQLALCH = None
-            
-            if self._logger:
-                self._logger.exception(self._logger.pfx() + f"Connection to the <{self.db_name}> database was not sucessful!", terminate=True)      
-            
-            else:
-                raise SystemExit(f"Connection to the <{self.db_name}> database was not sucessful!")
-            
+            logger.exception(f"Connection to the <{self.database}> database was not sucessful!", terminate=True)      
+
             
     def disconnect(self):
         """Disconnects from the database        
@@ -308,8 +251,7 @@ class PostgreSQLConnector:
             self.conn_PSYCOPG.close()
             self.conn_SQLALCH.close()
             self._is_connected = False
-            if self._logger:
-                self._logger.debug(self._logger.pfx() + f"<{self.db_name}> database was disconnected!")
+            logger.debug(f"<{self.database}> database was disconnected!")
             
         return self.is_connected
 
@@ -338,22 +280,13 @@ class PostgreSQLConnector:
             self.connect()            
         try:
             self.cursor_PSYCOPG.execute(query)
-            if self._logger:
-                self._logger.debug(self._logger.pfx() + f"Following query has been executed: \n <{query}>!")
-                
+            logger.debug(f"Following query has been executed: \n <{query}>!")
             return True
         
-        except Exception as err:
-            if err_raise:
-                if self._logger:
-                    self._logger.exception(self._logger.pfx() + f"Following query could not been executed: \n <{query}>!", terminate=True)
-                else:
-                    raise SystemExit(f"Query could not been executed! \n '{query}' \n due to: {err}")
-                    
-                return False
-            else:
-                return False
-
+        except Exception:
+            logger.exception(f"Following query could not been executed: \n <{query}>!", terminate=err_raise)
+            return False
+    
     
     def load_dataframe(self, query:str, err_raise:bool = True) -> pd.DataFrame:
         """ Executes query in the database 
@@ -383,34 +316,28 @@ class PostgreSQLConnector:
             # get dataframe info
             df_memory = round(df.memory_usage(deep=True).sum()/(1024)**2, 5)
             df_info = f"Downloaded table has {df.shape[0]} rows, {df.shape[1]} columns and takes {df_memory} MB of free space."
+            logger.info(f"DataFrame from following query has been executed: \n <{query}>! \n {df_info}")    
             
-            if self._logger:
-                self._logger.debug(self._logger.pfx() + f"DataFrame from following query has been loaded: \n <{query}>!")            
-                self._logger.debug(self._logger.pfx() + f"{df_info}")  
-                
+            if df.empty:
+                logger.warning("DataFrame is empty!")
+            
             return df
 
-        except Exception as err:
-            if err_raise:
-                if self._logger:
-                    self._logger.exception(self._logger.pfx() + f"Following query could not been executed: \n <{query}>!", terminate=True)
-                else:
-                    raise SystemExit(f"Query could not been executed! \n '{query}' \n due to: {err}")
-                    
-                return False
-            else:
-                return False
-
-    def save_dataframe(self, df:pd.DataFrame, db_table:str, db_schema:str = None, if_exists:str = "fail", err_raise:bool = True) -> bool:
+        except Exception:
+            logger.exception(f"Following query has could not been executed: \n <{query}>!", terminate=err_raise)
+            return False
+        
+        
+    def save_dataframe(self, df:pd.DataFrame, table:str, schema:str = None, if_exists:str = "fail", err_raise:bool = True) -> bool:
         """ Executes query in the database 
         
         Parameters
         ----------
         df : pd.DataFrame
             DataFrame which should be saved in the database
-        db_table : str
+        table : str
             Name of the table where DataFrame should be saved
-        db_schema : str, optional
+        schema : str, optional
             Name of the schema where DataFrame should be saved (default None)   
         if_exists : str, optional
             What should happen if table exists (options fail, append, replace [default fail])
@@ -436,20 +363,13 @@ class PostgreSQLConnector:
             self.connect()          
 
         try:
-            df.to_sql(name=db_table, schema=db_schema, con=self._sqlalch_engine, if_exists=if_exists, method="multi")
-            
-            if self._logger:
-                self._logger.debug(self._logger.pfx() + f"DataFrame has been saved into {db_table} table!")            
+            df.to_sql(name=table, schema=schema, con=self._sqlalch_engine, if_exists=if_exists, method="multi")
+            logger.info(f"DataFrame has been saved into {schema}.{table} in {self.database} database!")            
             return True
             
-        except Exception as err:
-            if err_raise:
-                if self._logger:
-                    self._logger.exception(self._logger.pfx() + f"Unfortunately, it was not possible to save the dataframe! \n {df}", terminate=True)
-                else:
-                    raise SystemExit(f"Unfortunately, it was not possible to save the dataframe! \n {df} \n due to: {err}")                    
-                return False
-            
-            else:
-                return False
+        except Exception:
+            logger.exception(f"Unfortunately, it was not possible to save the dataframe! \n {df}", terminate=err_raise)
+            return False
+        
 # %% NOTES
+
