@@ -23,11 +23,14 @@ import sys
 import traceback
 import getpass
 import platform
+import shutil
+import inspect
 from functools import wraps
 from IPython.core.interactiveshell import InteractiveShell
 from datetime import datetime
 
 # %% FILE IMPORT
+from antools.shared import TypeValidator
 
 # %% INPUTS
 
@@ -61,6 +64,8 @@ class Logger:
         Creates logger and its environment
     _replace_traceback(self)
         Replace traceback with self.error function to catch unexpected errors
+    _get_msg_format(self) -> str:
+        Formats logger info calls for logging messages
     debug(self, msg:str)
         Logs debug messages
     info(self, msg:str)
@@ -74,7 +79,9 @@ class Logger:
     exception(self, msg:str, terminate:bool = False)
         Logs error messages including SystemTraceback, used in try-except statement
         Performs SystemExit if intended
-       
+    wrong_input(self, call_object:object, var_name:"str", var_value, reason:str) -> ValueError
+        Raises ValueError and logs message in data is not corrent in the script
+        
     Raises
     --------   
     ValueError
@@ -138,24 +145,24 @@ class Logger:
         """
         
         # check if <_user_name> is string
-        if not isinstance (self._user_name, str): 
-            raise ValueError(f"Logger obtained invalid variable: <user_name> = <{self._user_name}>. It must be a string!")
+        if not TypeValidator.str(self._user_name):
+            raise ValueError(f"{self.__class__.__name__} obtained invalid variable: <user_name> = <{self._user_name}>. It must be a string!")
             
         # check if <_logger_name> is string
-        if not isinstance (self._logger_name, str):
-            raise ValueError(f"Logger obtained invalid variable: <logger_name> = <{self._logger_name}>. It must be a string!")
+        if not TypeValidator.str(self._logger_name):
+            raise ValueError(f"{self.__class__.__name__}: <logger_name> = <{self._logger_name}>. It must be a string!")
         
         # check if logging level exists
         if not self._level in ["DEBUG", "INFO", "WARNING", "CRITICAL", "ERROR"]:
-            raise ValueError(f"Logger obtained invalid variable: <level> = <{self._level}>. It is not valid logging level!")
+            raise ValueError(f"{self.__class__.__name__}: <level> = <{self._level}>. It is not valid logging level!")
             
         # check if path exists or can be created
         if not os.access(os.path.dirname(self._folder_path), os.W_OK):
-            raise ValueError("Logger obtained invalid variable <folder_path> = <{self._folder_path}>. It is invalid system path!")
+            raise ValueError("{self.__class__.__name__}: <folder_path> = <{self._folder_path}>. It is invalid system path!")
             
         # check if run on Windows
         if not platform.system() == "Windows":
-            raise SystemExit("Logger is not supported on other than Windows operating system!")
+            raise SystemExit("{self.__class__.__name__}: is not supported on other than Windows operating system!")
             
     def _setup_logger(self):        
         """ Creates logger and its environment 
@@ -169,12 +176,21 @@ class Logger:
         self.logger = logging.getLogger(self._logger_name)
         self.logger.setLevel(self._level)
         now = datetime.now()
-        full_path = os.path.join(self._folder_path, self._user_name, self._logger_name, str(now.year), now.strftime('%B'))
+        full_path = os.path.join(self._folder_path, str(now.year), now.strftime('%B'), self._user_name)
         
         # if <folder> does not exist, create it
-        if not os.path.isdir(full_path):
-            os.makedirs(full_path)
+        os.makedirs(full_path) if not os.path.isdir(full_path) else None
         
+        # delete old logs
+        years = os.listdir(self._folder_path)
+        for year_dir in years:
+            if os.path.isdir(os.path.join(self._folder_path, year_dir)):
+                if not year_dir in [str(now.year), str(now.year - 1)]:
+                    try:
+                        shutil.rmtree(os.path.join(self._folder_path, year_dir))
+                    except:
+                        pass
+
         # if Class with same name is called more than once, do not add handlers
         if len(self.logger.handlers) == 0:
             formatter = logging.Formatter("%(asctime)s : %(levelname)s : %(message)s", self._time_format)
@@ -187,11 +203,11 @@ class Logger:
             sh.setFormatter(formatter)
             self.logger.addHandler(sh)
           
-            self.debug(f"Logger <{self._logger_name}> has been initialized!")
+            self.debug(f"<{self._logger_name}> has been initialized!")
             
             # replace traceback to handle unhandled errors
             self._replace_traceback()
-            
+
     def _replace_traceback(self):  
         """ Replace traceback with self.error function to catch unexpected errors
         
@@ -207,7 +223,7 @@ class Logger:
                 sys.__excepthook__(exc_type, exc_value, exc_traceback)
                 return
 
-            self.logger.error(f"[{self._user_name}]" + " : " + "Serious error has been encountered! System must be terminated! \n", exc_info=(exc_type, exc_value, exc_traceback))
+            self.logger.error(self._get_msg_format() + "Serious error has been encountered! System must be terminated! \n", exc_info=(exc_type, exc_value, exc_traceback))
             
         sys.excepthook = log_traceback_system
         
@@ -215,11 +231,25 @@ class Logger:
         def log_traceback_spyder(func):    
             @wraps(func)
             def handle_exception(*args, **kwargs):
-                self.error(f"[{self._user_name}]" + " : " + "Serious error has been encountered! System must be terminated! \n" + traceback.format_exc(limit=1), terminate=False)                
+                self.error(self._get_msg_format() + "Serious error has been encountered! System must be terminated! \n" + traceback.format_exc(limit=20), terminate=False)                
 
             return handle_exception
         
         InteractiveShell.showtraceback = log_traceback_spyder(InteractiveShell.showtraceback)
+        
+    def _get_msg_format(self) -> str:
+        """ Formats logger info for logging messages """
+        
+        if self._level == "DEBUG":
+            stack = inspect.stack()[2]
+            path = stack.filename
+            cwd = os.getcwd()
+            path = "..\\" + os.path.relpath(path, cwd) if cwd in path else path
+            function = stack.function if stack.function != "<module>" else "module"
+            return f"[{self._user_name}]" + " : " + f"{path} : line {stack.lineno} : function <{function}>" + " : "
+        else:
+            return f"[{self._user_name}]" + " : "
+     
         
     def debug(self, msg:str):
         """ Logs debug messages
@@ -231,7 +261,8 @@ class Logger:
         
         """
         
-        self.logger.debug(f"[{self._user_name}]" + " : " + msg)
+        self.logger.debug(self._get_msg_format() + msg)
+
 
     def info(self, msg:str):
         """ Logs info messages
@@ -242,8 +273,9 @@ class Logger:
             Message to be logged
         
         """
-        self.logger.info(f"[{self._user_name}]" + " : " + msg)
 
+        self.logger.info(self._get_msg_format() + msg)
+        
     def warning(self, msg:str):
         """ Logs warning messages
         
@@ -253,7 +285,8 @@ class Logger:
             Message to be logged
         
         """
-        self.logger.warning(f"[{self._user_name}]" + " : " + msg)
+        self.logger.warning(self._get_msg_format() + msg)
+    
     
     def critical(self, msg:str):
         """ Logs critical messages.
@@ -264,8 +297,9 @@ class Logger:
             Message to be logged
         
         """
-        self.logger.critical(f"[{self._user_name}]" + " : " + msg)      
-                    
+        self.logger.critical(self._get_msg_format() + msg)      
+                
+        
     def error(self, msg:str, terminate:bool = True):
         """ Logs error messages, performs SystemExit if intended
         
@@ -277,12 +311,12 @@ class Logger:
             If True, performs SystemExit
         """
                 
-        self.logger.error(f"[{self._user_name}]" + " : " + msg)
         
-        if terminate:
+        if not terminate:
+            self.logger.error(self._get_msg_format() + msg)
+        else:
             raise SystemExit(msg)
 
-        
     def exception(self, msg:str, add_info:bool = False, terminate:bool = False):
         """ Logs error messages including SystemTraceback, used in try-except statement
         Performs SystemExit if intended
@@ -296,17 +330,19 @@ class Logger:
         """
         
         # if script is terminated, include info automatically
-        if terminate:
-            add_info = True
-            
-        self.logger.exception(f"[{self._user_name}]" + " : " + msg, exc_info=add_info)
-        
+        add_info = True if terminate else add_info   
+        self.logger.exception(self._get_msg_format() + msg, exc_info=add_info)
         if terminate:
             raise SystemExit(msg)
 
-
+    def wrong_input(self, call_object:object, var_name:"str", var_value, reason:str) -> ValueError:
+        """ Used in classes for checking right DataType """
+        
+        object_name = call_object.__class__.__name__ if isinstance(call_object, object) else object
+        msg = f"{object_name} obtained invalid parameter <{var_name}> = <{var_value}>. IT IS {reason}!"
+        raise ValueError(msg)
+            
 # create Logger instance
-logger = Logger()    
-
+LOGGER_LEVEL = "INFO"
+logger = Logger(level=LOGGER_LEVEL)    
 # %% NOTES
-

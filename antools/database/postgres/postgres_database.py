@@ -1,5 +1,5 @@
 """
-POSTGRESQL CONNECTOR CLASS
+POSTGRESQL DATABASE CLASS
 
 @ author: Antonín Drozda
 @ organization: Freelancer
@@ -10,7 +10,7 @@ Connector used for communicating with PostgreSQL database.
 """
 
 # %% FILE METADATA
-__title__ = "POSTGRESQL CONNECTOR CLASS"
+__title__ = "POSTGRESQL DATABASE CLASS"
 __author__ = "Antonín Drozda"
 __organization__ = "Freelancer"
 __project__ = "Anton's Tools"
@@ -19,15 +19,17 @@ __date__ = "25/03/2021"
 # %% LIBRARY IMPORT
 import psycopg2
 import pandas as pd
+import time
 from sqlalchemy import create_engine 
 
 # %% FILE IMPORT
 from antools.logging import logger
+from antools.shared import TypeValidator
 
 # %% INPUTS
 
 # %% CLASSES
-class PostgreSQLConnector():
+class PostgreSQLDatabase():
     """ Connector used for communication with PostgreSQL database
     
     ...
@@ -36,7 +38,7 @@ class PostgreSQLConnector():
     ----------
     database : str
         Name of the database
-    user : str,
+    user : str
         Name of the user
     password : str
         Password for database connection
@@ -45,7 +47,7 @@ class PostgreSQLConnector():
     port : str or int
         Port for connection
     _is_connected : bool
-        Boolean value storing info about PostgreSQLConnector connection
+        Boolean value storing info about PostgreSQLDatabase connection
     _conn_PSYCOPG : class
         Connection using <psycopg2> library
     _conn_SQLALCH : class
@@ -100,9 +102,12 @@ class PostgreSQLConnector():
         self.password = password
         self.server = server
         self.port = port
-    
-        self._check_inputs()
+        
+        self.database_type = 'postgres'
         self._is_connected = False
+        self._connection_time = 0
+        self._check_inputs()
+        
         self.connect()
         
     
@@ -119,29 +124,25 @@ class PostgreSQLConnector():
             If any inputs does not correspond to its intended data type.
             
         """
+        # check inputs
+        valid, reason = TypeValidator.str(self.database, reason=True)
+        None if valid else logger.wrong_input(self, "database", self.database, reason) 
+        
+        valid, reason = TypeValidator.str(self.user, reason=True)
+        None if valid else logger.wrong_input(self, "user", self.user, reason)            
 
-            
-        # check if database is string
-        if not isinstance (self.database, str): 
-            raise ValueError(f"PostgreSQLConnector obtained invalid variable: <database> = <{self.database}>. It must be a string!")
-
-        # check if user is string
-        if not isinstance (self.user, str): 
-            raise ValueError(f"PostgreSQLConnector obtained invalid variable: <user> = <{self.user}>. It must be a string!")
-
-        # check if password is string
-        if not isinstance (self.password, str): 
-            raise ValueError("PostgreSQLConnector obtained invalid variable: <password> = <XXX>. It must be a string!")
-
-        # check if server is string
-        if not isinstance (self.server, str): 
-            raise ValueError(f"PostgreSQLConnector obtained invalid variable: <server> = <{self.server}>. It must be a string!")
+        valid, reason = TypeValidator.str(self.password, reason=True)
+        None if valid else logger.wrong_input(self, "password", "XXX", reason) 
+        
+        valid, reason = TypeValidator.str(self.server, reason=True)
+        None if valid else logger.wrong_input(self, "server", self.server, reason) 
 
         # check if port is can be integer
-            try:
-                self.port = int(self.port)
-            except ValueError:
-                raise ValueError(f"PostgreSQLConnector obtained invalid variable: <port> = <{self.port}>. It cannot be transformed into integer!")
+        try:
+            self.port = int(self.port)
+        except ValueError:
+            valid, reason = TypeValidator.int(self.port, reason=True)
+            None if valid else logger.wrong_input(self, "port", self.port, reason) 
                 
                 
     def connect(self) -> bool:  
@@ -162,15 +163,18 @@ class PostgreSQLConnector():
             
         """
         
-        if not self._is_connected:
+        # reconnect if not connected or 120 seconds from last connection
+        if not self._is_connected or (time.time() - self._connection_time) > 120:
             self._conn_PSYCOPG = self._connect_with_PSYCOPG()
-            self._conn_SQLACH = self._connect_with_SQLALCH()        
+            self._conn_SQLACH = self._connect_with_SQLALCH()  
+            self._is_connected = True if self._conn_PSYCOPG and self._conn_SQLACH else False
 
-            if self._conn_PSYCOPG and self._conn_SQLACH:
-                self._is_connected = True
+            if self._is_connected:
+                self._connection_time = time.time()
+                logger.debug(f"{self.__class__.__name__} Connection to the <{self.database}> database was sucessful!")
+            else:
+                logger.error(f"{self.__class__.__name__} Connection to the <{self.database}> database was not sucessful!")
 
-            logger.info(f"Connection to the <{self.database}> database was sucessful!")
-            
         return self._is_connected
 
 
@@ -204,7 +208,7 @@ class PostgreSQLConnector():
         except Exception:
             self._is_connected = False
             self.conn_PSYCOPG = None
-            logger.exception(f"Connection to the <{self.database}> database was not sucessful!", terminate=True)      
+            logger.exception(f"{self.__class__.__name__} Connection to the <{self.database}> database was not sucessful!", terminate=True)      
 
     
     def _connect_with_SQLALCH(self):
@@ -232,7 +236,7 @@ class PostgreSQLConnector():
         except Exception:
             self._is_connected = False
             self.conn_SQLALCH = None
-            logger.exception(f"Connection to the <{self.database}> database was not sucessful!", terminate=True)      
+            logger.exception(f"{self.__class__.__name__} Connection to the <{self.database}> database was not sucessful!", terminate=True)      
 
             
     def disconnect(self):
@@ -253,7 +257,7 @@ class PostgreSQLConnector():
             self._is_connected = False
             logger.debug(f"<{self.database}> database was disconnected!")
             
-        return self.is_connected
+        return self._is_connected
 
             
     def execute_query(self, query:str, err_raise:bool = True) -> bool:
@@ -276,8 +280,15 @@ class PostgreSQLConnector():
             If err_raise == True and query was not performed      
         """
         
-        if not self._is_connected:
-            self.connect()            
+        # check data
+        valid, reason = TypeValidator.str(query, reason=True)
+        None if valid else logger.wrong_input(self, "query", query, reason)
+
+        valid, reason = TypeValidator.bool(err_raise, reason=True)
+        None if valid else logger.wrong_input(self, "err_raise", err_raise, reason)
+        
+        self.connect()
+        
         try:
             self.cursor_PSYCOPG.execute(query)
             logger.debug(f"Following query has been executed: \n <{query}>!")
@@ -307,20 +318,23 @@ class PostgreSQLConnector():
         SystemExit
             If err_raise == True and query was not performed      
         """ 
+        # check data
+        valid, reason = TypeValidator.str(query, reason=True)
+        None if valid else logger.wrong_input(self, "query", query, reason)
+
+        valid, reason = TypeValidator.bool(err_raise, reason=True)
+        None if valid else logger.wrong_input(self, "err_raise", err_raise, reason)
         
-        if not self._is_connected:
-            self.connect()   
+        self.connect()
+
         try:
             df = pd.read_sql(query, con=self._conn_PSYCOPG)
             
             # get dataframe info
             df_memory = round(df.memory_usage(deep=True).sum()/(1024)**2, 5)
             df_info = f"Downloaded table has {df.shape[0]} rows, {df.shape[1]} columns and takes {df_memory} MB of free space."
-            logger.info(f"DataFrame from following query has been executed: \n <{query}>! \n {df_info}")    
-            
-            if df.empty:
-                logger.warning("DataFrame is empty!")
-            
+            logger.debug(f"DataFrame from following query has been executed: \n <{query}>! \n {df_info}")    
+            logger.warning(f"DataFrame from query is empty!\n<{query}>") if df.empty else None
             return df
 
         except Exception:
@@ -354,13 +368,27 @@ class PostgreSQLConnector():
         Raises
         ----------
         SystemExit
-            If fail_terminate == True and DataFrame was not saved
+            If err_raise == True and DataFrame was not saved
         ValueError
             If if_exists == fail and table already exists
         """         
         
-        if not self._is_connected:
-            self.connect()          
+        # check data
+        valid, reason = TypeValidator.object(df, class_name="DataFrame", reason=True)
+        None if valid else logger.wrong_input(self, "df", df, reason)
+        
+        valid, reason = TypeValidator.str(table, reason=True)
+        None if valid else logger.wrong_input(self, "table", table, reason)
+
+        valid, reason = TypeValidator.str(schema, reason=True, none_allowed=True)
+        None if valid else logger.wrong_input(self, "schema", schema, reason)
+
+        None if if_exists in ["fail", "replace", "append"] else logger.wrong_input(self, "if_exists", if_exists, 'NOT IN AVAILABLE OPTIONS ["fail", "replace", "append"]')
+        
+        valid, reason = TypeValidator.bool(err_raise, reason=True)
+        None if valid else logger.wrong_input(self, "err_raise", err_raise, reason)     
+        
+        self.connect()       
 
         try:
             df.to_sql(name=table, schema=schema, con=self._sqlalch_engine, if_exists=if_exists, method="multi")
@@ -372,4 +400,3 @@ class PostgreSQLConnector():
             return False
         
 # %% NOTES
-

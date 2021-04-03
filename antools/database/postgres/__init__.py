@@ -16,4 +16,6 @@ __project__ = "Anton's Tools"
 __date__ = "27/02/2021"
 
 # %% FILE IMPORT
-from antools.database.postgres.postgres_connector import PostgreSQLConnector
+from antools.database.postgres.postgres_database import PostgreSQLDatabase
+from antools.database.postgres.postgres_schema import PostgreSQLSchema
+from antools.database.postgres.postgres_table import PostgreSQLTable

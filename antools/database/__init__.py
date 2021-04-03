@@ -18,4 +18,4 @@ __date__ = "25/03/2021"
 # %% FILE IMPORT
 
 # postgres
-from antools.database.postgres.postgres_connector import PostgreSQLConnector
+from antools.database.postgres import PostgreSQLDatabase, PostgreSQLSchema, PostgreSQLTable

@@ -1,5 +1,5 @@
 """
-DATA SCIENCE - DATA VALIDATION
+SHARED - DATA VALIDATION
 
 @ author: Antonín Drozda
 @ organization: Freelancer
@@ -9,7 +9,7 @@ DATA SCIENCE - DATA VALIDATION
 """
 
 # %% FILE METADATA
-__title__ = "DATA SCIENCE - DATA VALIDATION"
+__title__ = "SHARED - DATA VALIDATION"
 __author__ = "Antonín Drozda"
 __organization__ = "Freelancer"
 __project__ = "Anton's Tools"

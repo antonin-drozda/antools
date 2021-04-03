@@ -35,3 +35,8 @@ URL = "https://github.com/antonin-drozda"
 DESCRIPTION = "Private library which is also free to public use. Its purpose is to be useful code keeper."
 PACKAGE_DEPENDENCY = ['pandas >= 1.2.2', 'psycopg2 >= 2.8.6', 'sqlalchemy >= 1.3.23']
 KEYWORDS = ['antools', 'database', 'postgres', 'logger', 'logging', 'data science', 'data validation']
+
+# %% IMPORT ALL SUBFOLDERS
+from antools.database import *
+from antools.shared import *
+from antools.logging import *
