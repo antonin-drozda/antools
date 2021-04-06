@@ -25,6 +25,8 @@ import getpass
 import platform
 import shutil
 import inspect
+import time
+import pandas as pd
 from functools import wraps
 from IPython.core.interactiveshell import InteractiveShell
 from datetime import datetime
@@ -33,6 +35,7 @@ from datetime import datetime
 from antools.shared import TypeValidator
 
 # %% INPUTS
+LOGGER_LEVEL = "INFO"
 
 # %% CLASSES
 
@@ -54,13 +57,13 @@ class Logger:
         Format of day and time the Logger uses when logging messages
     _folder_path : str, optional
         Path to the folder where log_file is stored (default os.path.join(os.getcwd(), "logs"))
+    _executed_funtions
+        Information about functions with track decorator
 
         
     Methods
     -------
-    _check_inputs(self)
-        Checks validity of class inputs during Class initialization
-    _setup_logger(self)
+    _set_logger(self)
         Creates logger and its environment
     _replace_traceback(self)
         Replace traceback with self.error function to catch unexpected errors
@@ -79,6 +82,10 @@ class Logger:
     exception(self, msg:str, terminate:bool = False)
         Logs error messages including SystemTraceback, used in try-except statement
         Performs SystemExit if intended
+    track(self, func):
+        Log all information about function, usage as decorator
+    get_track_stats(self) -> pd.DataFrame:
+        Returns complete statistics of funtions with logger.track decorator
     wrong_input(self, call_object:object, var_name:"str", var_value, reason:str) -> ValueError
         Raises ValueError and logs message in data is not corrent in the script
         
@@ -96,6 +103,7 @@ class Logger:
     @ created: 25/03/2021
     
     """
+    _executed_functions = {}
       
     def __init__(self, 
                  user_name:str = getpass.getuser(),
@@ -118,32 +126,13 @@ class Logger:
             Path to the folder where log_file is stored (default os.path.join(os.getcwd(), "logs"))
             
         """
-                
+        
         self._user_name = user_name
         self._logger_name = logger_name
         self._level = level
         self._time_format = time_format
-        self._folder_path = folder_path        
+        self._folder_path = folder_path
                        
-        # automatically check inputs and create logger during __init__ method
-        self._check_inputs()
-        self._setup_logger()
-
-              
-    def _check_inputs(self):        
-        """Checks validity of class inputs during Class initialization
-        
-        Parameters
-        ----------
-        None
-        
-        Raises
-        ----------
-        ValueError
-            If any inputs does not correspond to its intended data type.
-            
-        """
-        
         # check if <_user_name> is string
         if not TypeValidator.str(self._user_name):
             raise ValueError(f"{self.__class__.__name__} obtained invalid variable: <user_name> = <{self._user_name}>. It must be a string!")
@@ -162,9 +151,21 @@ class Logger:
             
         # check if run on Windows
         if not platform.system() == "Windows":
-            raise SystemExit("{self.__class__.__name__}: is not supported on other than Windows operating system!")
+            raise SystemExit("{self.__class__.__name__}: is not yet supported on other than Windows operating system!")
             
-    def _setup_logger(self):        
+   
+        # automatically initialize logger        
+        self._set_logger()
+   
+    def __str__(self):
+        return f"{self._logger_file_path}"    
+    
+    
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self._user_name}, {self._level}, {self._logger_file_path})"
+            
+    
+    def _set_logger(self):        
         """ Creates logger and its environment 
         
         Parameters
@@ -177,6 +178,7 @@ class Logger:
         self.logger.setLevel(self._level)
         now = datetime.now()
         full_path = os.path.join(self._folder_path, str(now.year), now.strftime('%B'), self._user_name)
+        self._logger_file_path = os.path.join(full_path, f"{now.strftime('%B-%d-%Y_%H_%M_%S')}.log")
         
         # if <folder> does not exist, create it
         os.makedirs(full_path) if not os.path.isdir(full_path) else None
@@ -193,9 +195,8 @@ class Logger:
 
         # if Class with same name is called more than once, do not add handlers
         if len(self.logger.handlers) == 0:
-            formatter = logging.Formatter("%(asctime)s : %(levelname)s : %(message)s", self._time_format)
-                            
-            fh = logging.FileHandler(os.path.join(full_path, f"{now.strftime('%B-%d-%Y')}.log"), mode='w')
+            formatter = logging.Formatter("%(asctime)s : %(levelname)s : %(message)s", self._time_format)             
+            fh = logging.FileHandler(self._logger_file_path, mode='w')
             fh.setFormatter(formatter)
             self.logger.addHandler(fh)
         
@@ -207,6 +208,7 @@ class Logger:
             
             # replace traceback to handle unhandled errors
             self._replace_traceback()
+
 
     def _replace_traceback(self):  
         """ Replace traceback with self.error function to catch unexpected errors
@@ -222,15 +224,24 @@ class Logger:
             if issubclass(exc_type, KeyboardInterrupt):
                 sys.__excepthook__(exc_type, exc_value, exc_traceback)
                 return
-
-            self.logger.error(self._get_msg_format() + "Serious error has been encountered! System must be terminated! \n", exc_info=(exc_type, exc_value, exc_traceback))
             
+            # if any function used track decorator
+            if self._executed_functions:
+                self.info(f"\n {self.get_track_stats()}\n")
+                pd.set_option("display.max_rows", None, "display.max_columns", None)
+                
+            self.logger.error(self._get_msg_format() + "Serious error has been encountered! System must be terminated! \n", exc_info=(exc_type, exc_value, exc_traceback))
+             
         sys.excepthook = log_traceback_system
         
         # when run in spyder       
         def log_traceback_spyder(func):    
             @wraps(func)
             def handle_exception(*args, **kwargs):
+                # if any function used track decorator
+                if self._executed_functions:
+                    self.info(f"\n {self.get_track_stats()}\n")
+                    pd.set_option("display.max_rows", None, "display.max_columns", None)
                 self.error(self._get_msg_format() + "Serious error has been encountered! System must be terminated! \n" + traceback.format_exc(limit=20), terminate=False)                
 
             return handle_exception
@@ -335,14 +346,68 @@ class Logger:
         if terminate:
             raise SystemExit(msg)
 
+
+
+    def track(self, func):
+        """Log all information about function, usage as decorator"""
+        
+        function_fn = f"{func.__module__}.{func.__name__}"
+        if not function_fn in self._executed_functions:
+            self._executed_functions[function_fn] = {"run_times": 0,
+                                                    "total_time": 0,
+                                                    "avg_time": 0,
+                                                    "min_time": 999999,
+                                                    "max_time": 0,
+                                                    "last_input": None,
+                                                    "last_output": None,
+                                                    "last_time": 0}
+            
+        @wraps(func)
+        def log_track(*args, **kwargs):
+            start_time = time.perf_counter()    
+            value = func(*args, **kwargs)
+            end_time = time.perf_counter()      
+            run_time = end_time - start_time
+            
+            func_data = self._executed_functions[function_fn]
+            func_data["run_times"] += 1
+            func_data["total_time"] += run_time
+            func_data["avg_time"] = func_data["total_time"] / func_data["run_times"]
+            
+            func_data["min_time"] = run_time if func_data["min_time"] > run_time else func_data["min_time"]
+            func_data["max_time"] = run_time if func_data["max_time"] < run_time else func_data["max_time"]
+            
+            func_data["last_input"] = {"args": args, "kwargs": args}
+            func_data["last_output"] = value
+            func_data["last_time"] = run_time
+            
+            if self._level == 'DEBUG':
+                logger.debug(f"""\nFunction: {func.__module__}.{func.__name__}
+Input: args={args},\nkwargs={kwargs}
+Output: {value}
+Time: {run_time:.4f} secs\n""")
+            return value
+        return log_track
+    
+    
+    def get_track_stats(self) -> pd.DataFrame:
+        """ Returns complete statistics of funtions with logger.track decorator"""
+        data = pd.DataFrame(self._executed_functions)
+        data = data.transpose()
+        if not data.empty:
+            data = data.sort_values(by=["total_time"], ascending=False)
+            
+        return data
+    
+    
     def wrong_input(self, call_object:object, var_name:"str", var_value, reason:str) -> ValueError:
         """ Used in classes for checking right DataType """
         
         object_name = call_object.__class__.__name__ if isinstance(call_object, object) else object
         msg = f"{object_name} obtained invalid parameter <{var_name}> = <{var_value}>. IT IS {reason}!"
         raise ValueError(msg)
-            
-# create Logger instance
-LOGGER_LEVEL = "INFO"
-logger = Logger(level=LOGGER_LEVEL)    
+
+# %% CREATE LOGGER INSTANCE        
+logger = Logger(level=LOGGER_LEVEL)  
+
 # %% NOTES

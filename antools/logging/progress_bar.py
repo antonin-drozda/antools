@@ -90,23 +90,8 @@ class ProgressBar():
         self.length = length
         self.fill = fill
         
-        self._check_inputs()
-        print("\n")
-    
-    
-    def _check_inputs(self):
-        """Checks validity of class inputs during Class initialization
-        
-        Parameters
-        ----------
-        None
-        
-        Raises
-        ----------
-        ValueError
-            If any inputs does not correspond to its intended data type.
-            
-        """
+        self.iteration = 0
+        self.total = 0
         
         # check inputs from constructor
         valid, reason = TypeValidator.str(self.prefix, reason=True)
@@ -123,7 +108,13 @@ class ProgressBar():
 
         valid, reason = TypeValidator.str(self.fill, reason=True)
         None if valid else logger.wrong_input(self, "fill", self.fill, reason)
-        
+
+    
+    def __str__(self):
+        return f"{self.iteration}/{self.total}"
+    
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self.iteration}/{self.total})"
         
     def start(self, total:int) -> print:
         """ Initializing Bar with total number of loops to be made """
@@ -135,6 +126,7 @@ class ProgressBar():
         # prints bar at 0%
         self.total = total
         self.iteration = 0
+        print("\n")
         self._print_bar()
         
     

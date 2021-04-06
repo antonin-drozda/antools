@@ -1,6 +1,14 @@
 Change Log
 ==========
 
+
+2021.4.0 (06/04/2021)
+-------------------
+- COMPLETE REWORK
+- Logging: Logger, ProgressBar
+- Database: PostgreSQLDatabase, PostgreSQLSchema (IN PROCESS), PostgreSQLTable (IN PROCESS)
+- Shared: DataTypeValidator (IN PROCESS)
+
 2021.3.0 (01/03/2021)
 -------------------
 - DataTypeValidator has been Added

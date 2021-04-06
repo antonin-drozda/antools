@@ -17,51 +17,53 @@ __project__ = "Anton's Tools"
 __date__ = "28/03/2021"
 
 # %% LIBRARY IMPORT
+import pandas as pd
 
 # %% FILE IMPORT
 from antools.logging import logger
+from antools.database import SQLTable
 from antools.shared import TypeValidator
-import pandas as pd
+
 # %% INPUTS
 
 # %% CLASSES
-class PostgreSQLTable():
-    """ Connector used for communication with PostgreSQL Table
+class PostgreSQLTable(SQLTable):
+    """ Connector used for communication with PostgreSQLTable
     
     ...
 
     Attributes
     ----------
-    table : str
+    _table : str
         Name of the table
-    schema : str or object
+    _schema : str or object
         Name of the schema
-    database : str
+    _database : object
         Instance of PostgreSQLDatabase Class if not only sql queries should be generated
+    _full_name : str
+        Combination of _schema._table
 
     Methods
     -------
-    _check_inputs(self)
-        Check validity of class inputs
     create(self)
         NOT IMPLEMENTED YET
     select(self)
-        NOT FINISHED YET
+        IN PROCESS
     update(self)
-        NOT IMPLEMENTED YET
-    save_dataframe(self)
         NOT IMPLEMENTED YET
     delete(self)
         NOT IMPLEMENTED YET
-    info(self)
+    save_dataframe(self)
         NOT IMPLEMENTED YET
+    info(self)
+        Returns detailed info about the table
        
     Raises
     --------   
     ValueError
         If any inputs does not correspond to its intended data type.
     SystemExit
-        TO BE FINISHED
+        IN PROCESS
         
     Examples
     --------   
@@ -75,47 +77,43 @@ class PostgreSQLTable():
     """    
     
     def __init__(self, table, schema:str or object = None, database:object = None):
-        self.table = table
-        self.schema = schema
-        self.database = database
-        self._check_inputs()
-        self.full_name = self.schema + "." + self.table if self.schema else self.table
-    
-    def _check_inputs(self):
-        """Check validity of class inputs
+        self._table = table
+        self._schema = schema
+        self._database = database
         
-        Parameters
-        ----------
-        None
         
-        Raises
-        ----------
-        ValueError
-            If any inputs does not correspond to its intended data type.
-            
-        """
+        # check table
+        valid, reason = TypeValidator.str(self._table, reason=True)
+        None if valid else logger.wrong_input(self, "table", self._table, reason)    
         
-        # check inputs from constructor
-        valid, reason = TypeValidator.str(self.table, reason=True)
-        None if valid else logger.wrong_input(self, "table", self.table, reason)    
-        
-        valid, reason = TypeValidator.str(self.schema, none_allowed=True, reason=True)
+        # check schema
+        valid, reason = TypeValidator.str(self._schema, none_allowed=True, reason=True)
         if not valid:
-            valid, reason = TypeValidator.object(self.schema, class_name="PostgreSQLSchema", reason=True)    
-            self.schema = self.schema.schema if valid else logger.wrong_input(self, "schema", self.schema, "NOT AN <PostgreSQLSchema> OBJECT OR STRING")
+            valid, reason = TypeValidator.object(self._schema, class_name="PostgreSQLSchema", reason=True)    
+            self._schema = self._schema.schema if valid else logger.wrong_input(self, "schema", self._schema, "NOT AN <PostgreSQLSchema> OBJECT OR STRING")
         
-        valid, reason = TypeValidator.object(self.database, class_name="PostgreSQLDatabase", reason=True)      
-        self.database = None if not valid else self.database
-        logger.warning(f"{self.__class__.__name__} was NOT initialized with valid conn to Database. It will generates only SQL queries!") if not self.database else None           
+        # check database
+        valid, reason = TypeValidator.object(self._database, class_name="PostgreSQLDatabase", reason=True)
+        None if valid else logger.wrong_input(self, "database", self._database, reason)
         
-                
+        self._full_name = self._schema + "." + self._table if self._schema else self._table
+        
+
+    def __str__(self):   
+        return f"{self._full_name}"
+    
+    
+    def __repr__(self):
+        return f"{self.__class__.__name__}(name={self._full_name}, database={self._database._database})"
+    
+    
     def create(self):
-        """ Creates table in Postgres Database or generates SQL query for it"""
+        """ Creates table in PostgreSQLDatabase"""
         raise NotImplementedError("<{self.__class__.__name__}> cannot be created yet!")
     
     
-    def select(self, columns:list or dict = {}, where:str = None) -> pd.DataFrame or str:
-        """ Creates table in Postgres Database or generates SQL query for it
+    def select(self, columns:list or dict = {}, where:str = None) -> pd.DataFrame:
+        """ Creates table in PostgreSQLDatabase
         
         Parameters
         ----------
@@ -154,26 +152,22 @@ class PostgreSQLTable():
         # where statement
         where = '' if not where else 'WHERE ' + where
         
-        query = f'''SELECT {selected_columns} \nFROM {self.full_name}\n{where} ''' 
+        query = f'''SELECT {selected_columns} \nFROM {self._full_name}\n{where} ''' 
         self._reconnect()
         
-        if self.database:
-            try:
-                df = self.database.load_dataframe(query)
-                return df
-            except Exception as err:
-                logger.error(f"DataFrame could not be loaded from {self.full_name} due to: \n{err}")
-        else:
-            return query
+        try:
+            return self._database.load_dataframe(query)            
+        except Exception as err:
+            logger.error(f"DataFrame could not be loaded from {self._full_name} due to: \n{err}")
 
         
     def update(self):
-        """ Updates table in Postgres Database or generates SQL query for it"""
+        """ Updates table in PostgreSQLDatabase"""
         raise NotImplementedError("<{self.__class__.__name__}> cannot be updated yet!")
     
     
     def save_dataframe(self, df, if_exists:str = "fail", err_raise:bool = True) -> bool:
-        """ Saves Dataframe in Postgres Database or generates SQL query for it
+        """ Saves Dataframe in PostgreSQLDatabase
         
         Parameters
         ----------
@@ -201,10 +195,7 @@ class PostgreSQLTable():
         ValueError
             If if_exists == fail and table already exists
         """
-        
-        if not self.database:
-            logger.error(f"DataFrame can't be saved because <{self.__class__.__name__}> has no valid database connection!")
-            
+                    
         # check data
         valid, reason = TypeValidator.object(df, class_name="DataFrame", reason=True)
         None if valid else logger.wrong_input(self, "df", df, reason)
@@ -217,25 +208,45 @@ class PostgreSQLTable():
         self._reconnect()  
 
         try:
-            df.to_sql(name=self.table, schema=self.schema, con=self.database._sqlalch_engine, if_exists=if_exists, method="multi")
-            logger.info(f"DataFrame has been saved into {self.full_name} in {self.database} database!")            
+            df.to_sql(name=self._table, schema=self._schema, con=self._database._sqlalch_engine, if_exists=if_exists, method="multi")
+            logger.info(f"DataFrame has been saved into {self._full_name} in {self._database} database!")            
             return True
             
         except Exception as err:
             logger.exception(f"Unfortunately, it was not possible to save the dataframe due to: \n{err}", terminate=err_raise)
             return False 
     
-    def delete(self):
-        """ Delete table in Postgres Database or generates SQL query for it"""
-        raise NotImplementedError("<{self.__class__.__name__}> cannot be deleted yet!")
     
-    def info(self):
-        """ Get info of table in Postgres Database or generates SQL query for it"""
-        raise NotImplementedError("<{self.__class__.__name__}> cannot get info yet!")
+    def delete(self):
+        """ Delete table in PostgreSQLDatabase"""
+        raise NotImplementedError("<{self.__class__.__name__}> cannot be deleted yet!")
 
+
+    def info(self) -> dict:
+        """ Returns detailed info about PostgreSQLTable """
+        
+        self._reconnect()
+        sql_info = self._database.load_dataframe(f""" SELECT *
+                                               FROM 
+                                                   information_schema.columns
+                                               WHERE 
+                                                   table_name = '{self._table}'
+                                               AND table_schema = '{self._schema}';""")
+   
+        
+        no_rows = self._database.load_dataframe(f""" SELECT COUNT(*) FROM {self._full_name}; """).iloc[0][0]
+                                           
+        return {"database": self._database._database,
+                "schema": self._schema,
+                "name": self._table,
+                "rows_no": no_rows,
+                "columns": sql_info[["column_name", "data_type"]].set_index("column_name").to_dict()["data_type"],
+                "full info": sql_info}
+    
+        
     def _reconnect(self):
-         """ Reconnects to the database if available """
-         self.database.connect() if self.database else None
+         """ Reconnects to the PostgreSQLDatabase"""
+         self._database.connect()
         
 # %% NOTES
 

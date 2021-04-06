@@ -1,34 +1,35 @@
 """
-POSTGRESQL SCHEMA CLASS
+ABSTRACT SCHEMA CLASS
 
 @ author: Antonín Drozda
 @ organization: Freelancer
 @ project: Anton's Tools
-@ date: 28/03/2021
+@ date: 06/04/2021
 
 Class representing Postgre SQL Schema
 """
 
 # %% FILE METADATA
-__title__ = "POSTGRESQL SCHEMA CLASS"
+__title__ = "ABSTRACT SCHEMA CLASS"
 __author__ = "Antonín Drozda"
 __organization__ = "Freelancer"
 __project__ = "Anton's Tools"
-__date__ = "28/03/2021"
+__date__ = "06/04/2021"
 
 # %% LIBRARY IMPORT
+from abc import ABC, ABCMeta, abstractclassmethod
 
 # %% FILE IMPORT
-from antools.logging import logger
-from antools.shared import TypeValidator
-from antools.database import SQLSchema
 
 # %% INPUTS
 
 # %% CLASSES
-class PostgreSQLSchema(SQLSchema):
+class SQLSchema(ABC):
+    """ Abstract class for SQLSchema Type classes """
+    __metaclass__ = ABCMeta
     
-    def __init__(self, schema):
-        self.schema = schema
+    @abstractclassmethod
+    def __init__(self):
+        pass
 
 # %% NOTES

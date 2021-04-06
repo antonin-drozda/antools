@@ -24,28 +24,31 @@ from sqlalchemy import create_engine
 
 # %% FILE IMPORT
 from antools.logging import logger
+from antools.database import SQLDatabase
 from antools.shared import TypeValidator
 
 # %% INPUTS
 
 # %% CLASSES
-class PostgreSQLDatabase():
+class PostgreSQLDatabase(SQLDatabase):
     """ Connector used for communication with PostgreSQL database
     
     ...
 
     Attributes
     ----------
-    database : str
+    _database : str
         Name of the database
-    user : str
+    _user : str
         Name of the user
-    password : str
+    _password : str
         Password for database connection
-    server : str
+    _server : str
         Server name (default 'localhost')
-    port : str or int
+    _port : str or int
         Port for connection
+    _database_type:
+        Holds information of type of SQL database
     _is_connected : bool
         Boolean value storing info about PostgreSQLDatabase connection
     _conn_PSYCOPG : class
@@ -58,8 +61,6 @@ class PostgreSQLDatabase():
 
     Methods
     -------
-    _check_inputs(self)
-        Check validity of class inputs
     connect(self) -> bool
         Connects to the database
     _connect_with_PSYCOPG(self)
@@ -94,57 +95,51 @@ class PostgreSQLDatabase():
     
     """
     
-    def __init__(self, database:str, user:str, password:str,
-                     server:str = 'localhost', port:str or int = '5432'):
-        
-        self.database = database
-        self.user = user
-        self.password = password
-        self.server = server
-        self.port = port
-        
-        self.database_type = 'postgres'
-        self._is_connected = False
-        self._connection_time = 0
-        self._check_inputs()
-        
-        self.connect()
-        
+    _database_type = 'postgres'
+    _is_connected = False
+    _connection_time = 0
     
-    def _check_inputs(self):
-        """Check validity of class inputs
+    def __init__(self, database:str, user:str, password:str,
+                     server:str = 'localhost', port:str or int = 5432):
         
-        Parameters
-        ----------
-        None
-        
-        Raises
-        ----------
-        ValueError
-            If any inputs does not correspond to its intended data type.
-            
-        """
-        # check inputs
-        valid, reason = TypeValidator.str(self.database, reason=True)
-        None if valid else logger.wrong_input(self, "database", self.database, reason) 
-        
-        valid, reason = TypeValidator.str(self.user, reason=True)
-        None if valid else logger.wrong_input(self, "user", self.user, reason)            
+        self._database = database
+        self._user = user
+        self._password = password
+        self._server = server
+        self._port = port
 
-        valid, reason = TypeValidator.str(self.password, reason=True)
+        # check inputs
+        valid, reason = TypeValidator.str(self._database, reason=True)
+        None if valid else logger.wrong_input(self, "database", self._database, reason) 
+        
+        valid, reason = TypeValidator.str(self._user, reason=True)
+        None if valid else logger.wrong_input(self, "user", self._user, reason)            
+
+        valid, reason = TypeValidator.str(self._password, reason=True)
         None if valid else logger.wrong_input(self, "password", "XXX", reason) 
         
-        valid, reason = TypeValidator.str(self.server, reason=True)
-        None if valid else logger.wrong_input(self, "server", self.server, reason) 
+        valid, reason = TypeValidator.str(self._server, reason=True)
+        None if valid else logger.wrong_input(self, "server", self._server, reason) 
 
         # check if port is can be integer
         try:
-            self.port = int(self.port)
+            self._port = int(self._port)
         except ValueError:
-            valid, reason = TypeValidator.int(self.port, reason=True)
-            None if valid else logger.wrong_input(self, "port", self.port, reason) 
+            valid, reason = TypeValidator.int(self._port, reason=True)
+            None if valid else logger.wrong_input(self, "port", self._port, reason)
+        
+        # automatically connect during initialization
+        self.connect()
+    
+    
+    def __str__(self):
+        return f"{self.__class__.__name__}({self._database}, {self._server}, connected={self._is_connected})"
+    
+    
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self._database}, {self._server}, connected={self._is_connected})"
                 
-                
+    
     def connect(self) -> bool:  
         """ Connects to the database          
         
@@ -171,9 +166,9 @@ class PostgreSQLDatabase():
 
             if self._is_connected:
                 self._connection_time = time.time()
-                logger.debug(f"{self.__class__.__name__} Connection to the <{self.database}> database was sucessful!")
+                logger.debug(f"{self.__class__.__name__} Connection to the <{self._database}> database was sucessful!")
             else:
-                logger.error(f"{self.__class__.__name__} Connection to the <{self.database}> database was not sucessful!")
+                logger.error(f"{self.__class__.__name__} Connection to the <{self._database}> database was not sucessful!")
 
         return self._is_connected
 
@@ -195,11 +190,11 @@ class PostgreSQLDatabase():
             If it was not possible to connect
         """
         try:
-            self.conn_PSYCOPG = psycopg2.connect(host=self.server, 
-                                        port=self.port, 
-                                        database=self.database,
-                                        user=self.user,
-                                        password=self.password)
+            self.conn_PSYCOPG = psycopg2.connect(host=self._server, 
+                                        port=self._port, 
+                                        database=self._database,
+                                        user=self._user,
+                                        password=self._password)
                
             self.conn_PSYCOPG.autocommit = True
             self.cursor_PSYCOPG = self.conn_PSYCOPG.cursor()  
@@ -208,7 +203,7 @@ class PostgreSQLDatabase():
         except Exception:
             self._is_connected = False
             self.conn_PSYCOPG = None
-            logger.exception(f"{self.__class__.__name__} Connection to the <{self.database}> database was not sucessful!", terminate=True)      
+            logger.exception(f"{self.__class__.__name__} Connection to the <{self._database}> database was not sucessful!", terminate=True)      
 
     
     def _connect_with_SQLALCH(self):
@@ -228,7 +223,7 @@ class PostgreSQLDatabase():
             If it was not possible to connect
         """
         try:
-            self._sqlalch_engine = create_engine(f"postgresql://{self.user}:{self.password}@{self.server}:{self.port}/{self.database}",
+            self._sqlalch_engine = create_engine(f"postgresql://{self._user}:{self._password}@{self._server}:{self._port}/{self._database}",
                                     connect_args={'connect_timeout': 3})
             self.conn_SQLALCH = self._sqlalch_engine.connect()
             return self.conn_SQLALCH
@@ -236,7 +231,7 @@ class PostgreSQLDatabase():
         except Exception:
             self._is_connected = False
             self.conn_SQLALCH = None
-            logger.exception(f"{self.__class__.__name__} Connection to the <{self.database}> database was not sucessful!", terminate=True)      
+            logger.exception(f"{self.__class__.__name__} Connection to the <{self._database}> database was not sucessful!", terminate=True)      
 
             
     def disconnect(self):
@@ -255,7 +250,7 @@ class PostgreSQLDatabase():
             self.conn_PSYCOPG.close()
             self.conn_SQLALCH.close()
             self._is_connected = False
-            logger.debug(f"<{self.database}> database was disconnected!")
+            logger.debug(f"<{self._database}> database was disconnected!")
             
         return self._is_connected
 
@@ -392,7 +387,7 @@ class PostgreSQLDatabase():
 
         try:
             df.to_sql(name=table, schema=schema, con=self._sqlalch_engine, if_exists=if_exists, method="multi")
-            logger.info(f"DataFrame has been saved into {schema}.{table} in {self.database} database!")            
+            logger.info(f"DataFrame has been saved into {schema}.{table} in {self._database} database!")            
             return True
             
         except Exception:
