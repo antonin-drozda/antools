@@ -12,7 +12,7 @@ Anton's Tools package contains methods for
 ### Dependencies
 The antools package utilizes following libraries:
 
-* Data Science:
+Data Science:
 * none
 
 Databases:
