@@ -81,15 +81,13 @@ class EffeciencyHandler():
     
     def __call__(self):
         """ Returns get_stats method """
-        return self.get_stats()
+        return self.get_stats() if self.stats else "NO PROCESS"
 
 
     def start(self, process:str or int):
         """ Starts measuring new process """
         
         process = str(process)
-        if process in self.stats:
-            logger.error("Process with same name has been already executed!")
         
         # automatically finish previous aproach
         if self.curr_process:
@@ -110,8 +108,7 @@ class EffeciencyHandler():
         time_diff = round(end_time - self.start_time, 4)
         memory_diff = round(end_memory - self.start_memory, 4)
         
-        if memory_diff < 0:
-            logger.error("Memory is lower than when process has started ... no overwritting or deleting of variables!")
+        memory_diff = 0 if memory_diff < 0 else memory_diff
         
         self.stats[self.curr_process][self.TIME_COL] = time_diff 
         self.stats[self.curr_process][self.RAM_COL] = memory_diff
@@ -126,6 +123,10 @@ class EffeciencyHandler():
     def get_stats(self) -> pd.DataFrame:
         """ Returns pd.DataFrame with all processed and its data """
         
+        # automaticall finish previous process
+        if self.curr_process:
+            self.finish()
+            
         df = pd.DataFrame(data=self.stats).transpose().sort_values(by=[self.TIME_COL], ascending=True)
         mins_dict = df.idxmin().to_dict()
         
