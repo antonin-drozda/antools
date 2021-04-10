@@ -129,5 +129,6 @@ dmypy.json
 .pyre/
 
 # custom
+antools_tests
 test_file.py
 db_properties.ini
