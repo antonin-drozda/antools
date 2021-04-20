@@ -33,13 +33,13 @@ from datetime import datetime
 
 # %% FILE IMPORT
 from antools.shared import TypeValidator
+from .abstract_logger import AbstractLogger
 
 # %% INPUTS
-LOGGER_LEVEL = "INFO"
 
 # %% CLASSES
 
-class Logger:
+class _Logger(AbstractLogger):
     """ Customized Logger class responsible for logging for antools methods
         Logs into console and into specific directory
     
@@ -47,6 +47,8 @@ class Logger:
     
     Attributes
     ----------
+    _active: bool
+        Holds value if Logger is being used or not
     _user_name : str
         Name of the user who uses the application supported by this Logger class      
     _logger_name : str, optional
@@ -105,17 +107,34 @@ class Logger:
     """
     _executed_functions = {}
       
-    def __init__(self, 
-                 user_name:str = getpass.getuser(),
-                 logger_name:str = "logger",
-                 level:str = "INFO",
-                 time_format:str = "%Y-%m-%d %H:%M:%S",
-                 folder_path:str = os.path.join(os.getcwd(), "logs")):
+    def __init__(self):
+        self.active = False
+
+    def __str__(self):
+        return f"{self._logger_file_path}"    
+    
+    
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self._user_name}, {self._level}, {self._logger_file_path})"
+            
+    
+    def _set_logger(self, 
+                    console_log:bool = True,
+                    level:str = "INFO",
+                    user_name:str = getpass.getuser(),
+                    logger_name:str = "logger",
+                    time_format:str = "%Y-%m-%d %H:%M:%S",
+                    folder_path:str = os.path.join(os.getcwd(), "logs")): 
+    
+        
         """
+        Creates logger and its environment
         ...
         
         Parameters
         ----------
+        console_log : bool
+            If Logger should also print messages into console  
         user_name : str
             Name of the user who uses the application supported by this Logger class       
         logger_name : str, optional
@@ -127,11 +146,16 @@ class Logger:
             
         """
         
+        self._console_log = console_log
+        self._level = level
         self._user_name = user_name
         self._logger_name = logger_name
-        self._level = level
         self._time_format = time_format
         self._folder_path = folder_path
+
+        # check if <_console_log> is bool
+        if not TypeValidator.bool(self._console_log):
+            raise ValueError(f"{self.__class__.__name__} obtained invalid variable: <console_log> = <{self._console_log}>. It must be a boolean!")
                        
         # check if <_user_name> is string
         if not TypeValidator.str(self._user_name):
@@ -151,29 +175,11 @@ class Logger:
             
         # check if run on Windows
         if not platform.system() == "Windows":
-            raise SystemExit("{self.__class__.__name__}: is not yet supported on other than Windows operating system!")
+            raise SystemExit("{self.__class__.__name__}: is not yet supported on other than Windows operating system!")  
             
-   
-        # automatically initialize logger        
-        self._set_logger()
-   
-    def __str__(self):
-        return f"{self._logger_file_path}"    
-    
-    
-    def __repr__(self):
-        return f"{self.__class__.__name__}({self._user_name}, {self._level}, {self._logger_file_path})"
             
-    
-    def _set_logger(self):        
-        """ Creates logger and its environment 
         
-        Parameters
-        ----------
-        None
-        
-        """
-        
+        # set logger
         self.logger = logging.getLogger(self._logger_name)
         self.logger.setLevel(self._level)
         now = datetime.now()
@@ -192,24 +198,26 @@ class Logger:
                         shutil.rmtree(os.path.join(self._folder_path, year_dir))
                     except:
                         pass
-
+                    
         # if Class with same name is called more than once, do not add handlers
         if len(self.logger.handlers) == 0:
             formatter = logging.Formatter("%(asctime)s : %(levelname)s : %(message)s", self._time_format)             
             fh = logging.FileHandler(self._logger_file_path, mode='w')
             fh.setFormatter(formatter)
             self.logger.addHandler(fh)
-        
-            sh = logging.StreamHandler()
-            sh.setFormatter(formatter)
-            self.logger.addHandler(sh)
+            
+            if console_log:
+                sh = logging.StreamHandler()
+                sh.setFormatter(formatter)
+                self.logger.addHandler(sh)
           
             self.debug(f"<{self._logger_name}> has been initialized!")
             
             # replace traceback to handle unhandled errors
             self._replace_traceback()
 
-
+        self.active = True
+        
     def _replace_traceback(self):  
         """ Replace traceback with self.error function to catch unexpected errors
         
@@ -326,6 +334,8 @@ class Logger:
         if not terminate:
             self.logger.error(self._get_msg_format() + msg)
         else:
+            if not self._console_log:
+                print("ERROR: " + self._get_msg_format() + msg)
             raise SystemExit(msg)
 
     def exception(self, msg:str, add_info:bool = False, terminate:bool = False):
@@ -344,6 +354,8 @@ class Logger:
         add_info = True if terminate else add_info   
         self.logger.exception(self._get_msg_format() + msg, exc_info=add_info)
         if terminate:
+            if not self._console_log:
+                print("ERROR: " + self._get_msg_format() + msg)
             raise SystemExit(msg)
 
 
@@ -382,7 +394,8 @@ class Logger:
             func_data["last_time"] = run_time
             
             if self._level == 'DEBUG':
-                logger.debug(f"""\nFunction: {func.__module__}.{func.__name__}
+                self.logger.debug(f"""\nFunction: {func.__module__}.{func.__name__}
+                             
 Input: args={args},\nkwargs={kwargs}
 Output: {value}
 Time: {run_time:.4f} secs\n""")
@@ -408,6 +421,6 @@ Time: {run_time:.4f} secs\n""")
         raise ValueError(msg)
 
 # %% CREATE LOGGER INSTANCE        
-logger = Logger(level=LOGGER_LEVEL)  
+_LOGGER = _Logger() 
 
 # %% NOTES

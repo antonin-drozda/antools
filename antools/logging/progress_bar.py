@@ -19,9 +19,8 @@ __date__ = "30/03/2021"
 # %% LIBRARY IMPORT
 
 # %% FILE IMPORT
-from antools.logging import logger
 from antools.shared import TypeValidator
-
+from antools.logging import get_logger
 # %% INPUTS
 
 # %% CLASSES
@@ -89,25 +88,26 @@ class ProgressBar():
         self.decimals = decimals
         self.length = length
         self.fill = fill
+        self._logger = get_logger()
         
         self.iteration = 0
         self.total = 0
         
         # check inputs from constructor
         valid, reason = TypeValidator.str(self.prefix, reason=True)
-        None if valid else logger.wrong_input(self, "prefix", self.prefix, reason)
+        None if valid else self._logger.wrong_input(self, "prefix", self.prefix, reason)
     
         valid, reason = TypeValidator.str(self.suffix, reason=True)
-        None if valid else logger.wrong_input(self, "suffix", self.suffix, reason)
+        None if valid else self._logger.wrong_input(self, "suffix", self.suffix, reason)
 
         valid, reason = TypeValidator.int(self.decimals, reason=True)
-        None if valid else logger.wrong_input(self, "decimals", self.decimals, reason)
+        None if valid else self._logger.wrong_input(self, "decimals", self.decimals, reason)
         
         valid, reason = TypeValidator.int(self.length, reason=True)
-        None if valid else logger.wrong_input(self, "length", self.length, reason)
+        None if valid else self._logger.wrong_input(self, "length", self.length, reason)
 
         valid, reason = TypeValidator.str(self.fill, reason=True)
-        None if valid else logger.wrong_input(self, "fill", self.fill, reason)
+        None if valid else self._logger.wrong_input(self, "fill", self.fill, reason)
 
     
     def __str__(self):
@@ -121,7 +121,7 @@ class ProgressBar():
 
         # check inputs from constructor
         valid, reason = TypeValidator.int(total, reason=True)
-        None if valid else logger.wrong_input(self, "total", total, reason)
+        None if valid else self._logger.wrong_input(self, "total", total, reason)
         
         # prints bar at 0%
         self.total = total
@@ -135,7 +135,7 @@ class ProgressBar():
 
         # check inputs from constructor
         valid, reason = TypeValidator.int(update, reason=True)
-        None if valid else logger.wrong_input(self, "update", update, reason)
+        None if valid else self._logger.wrong_input(self, "update", update, reason)
         
         # update bar, not allow over 100%
         self.iteration += update

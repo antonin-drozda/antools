@@ -19,7 +19,7 @@ __date__ = "28/03/2021"
 # %% LIBRARY IMPORT
 
 # %% FILE IMPORT
-from antools.logging import logger
+from antools.logging import get_logger
 from antools.shared import TypeValidator
 from antools.database import SQLSchema
 

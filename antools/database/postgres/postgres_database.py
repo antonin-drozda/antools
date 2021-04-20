@@ -23,7 +23,7 @@ import time
 from sqlalchemy import create_engine 
 
 # %% FILE IMPORT
-from antools.logging import logger
+from antools.logging import get_logger
 from antools.database import SQLDatabase
 from antools.shared import TypeValidator
 
@@ -97,6 +97,7 @@ class PostgreSQLDatabase(SQLDatabase):
     
     _database_type = 'postgres'
     _is_connected = False
+    _connection_issue = None
     _connection_time = 0
     
     def __init__(self, database:str, user:str, password:str,
@@ -107,30 +108,29 @@ class PostgreSQLDatabase(SQLDatabase):
         self._password = password
         self._server = server
         self._port = port
+        
+        self._logger = get_logger()
 
         # check inputs
         valid, reason = TypeValidator.str(self._database, reason=True)
-        None if valid else logger.wrong_input(self, "database", self._database, reason) 
+        None if valid else self._logger.wrong_input(self, "database", self._database, reason) 
         
         valid, reason = TypeValidator.str(self._user, reason=True)
-        None if valid else logger.wrong_input(self, "user", self._user, reason)            
+        None if valid else self._logger.wrong_input(self, "user", self._user, reason)            
 
         valid, reason = TypeValidator.str(self._password, reason=True)
-        None if valid else logger.wrong_input(self, "password", "XXX", reason) 
+        None if valid else self._logger.wrong_input(self, "password", "XXX", reason) 
         
         valid, reason = TypeValidator.str(self._server, reason=True)
-        None if valid else logger.wrong_input(self, "server", self._server, reason) 
+        None if valid else self._logger.wrong_input(self, "server", self._server, reason) 
 
         # check if port is can be integer
         try:
             self._port = int(self._port)
         except ValueError:
             valid, reason = TypeValidator.int(self._port, reason=True)
-            None if valid else logger.wrong_input(self, "port", self._port, reason)
-        
-        # automatically connect during initialization
-        self.connect()
-    
+            None if valid else self._logger.wrong_input(self, "port", self._port, reason)
+            
     
     def __str__(self):
         return f"{self.__class__.__name__}({self._database}, {self._server}, connected={self._is_connected})"
@@ -140,12 +140,13 @@ class PostgreSQLDatabase(SQLDatabase):
         return f"{self.__class__.__name__}({self._database}, {self._server}, connected={self._is_connected})"
                 
     
-    def connect(self) -> bool:  
+    def connect(self, err_raise:bool = False) -> bool:  
         """ Connects to the database          
         
         Parameters
         ----------
-        None
+        err_raise
+            If SystemExit should be called when connection is not successfull
         
         Returns
         ----------
@@ -157,6 +158,8 @@ class PostgreSQLDatabase(SQLDatabase):
             If it was not possible to connect with psycopg2 or sqlalchemy library
             
         """
+        valid, reason = TypeValidator.bool(err_raise, reason=True)
+        None if valid else self._logger.wrong_input(self, "err_raise", err_raise, reason)
         
         # reconnect if not connected or 120 seconds from last connection
         if not self._is_connected or (time.time() - self._connection_time) > 120:
@@ -166,9 +169,9 @@ class PostgreSQLDatabase(SQLDatabase):
 
             if self._is_connected:
                 self._connection_time = time.time()
-                logger.debug(f"{self.__class__.__name__} Connection to the <{self._database}> database was sucessful!")
+                self._logger.debug(f"{self.__class__.__name__} Connection to the <{self._database}> database was sucessful!")
             else:
-                logger.error(f"{self.__class__.__name__} Connection to the <{self._database}> database was not sucessful!")
+                self._logger.error(f"{self.__class__.__name__} Connection to the <{self._database}> database was not sucessful due to \n{self._connection_issue}!", terminate=err_raise)
 
         return self._is_connected
 
@@ -200,10 +203,10 @@ class PostgreSQLDatabase(SQLDatabase):
             self.cursor_PSYCOPG = self.conn_PSYCOPG.cursor()  
             return self.conn_PSYCOPG
             
-        except Exception:
+        except Exception as err:
             self._is_connected = False
             self.conn_PSYCOPG = None
-            logger.exception(f"{self.__class__.__name__} Connection to the <{self._database}> database was not sucessful!", terminate=True)      
+            self._connection_issue = err
 
     
     def _connect_with_SQLALCH(self):
@@ -228,10 +231,10 @@ class PostgreSQLDatabase(SQLDatabase):
             self.conn_SQLALCH = self._sqlalch_engine.connect()
             return self.conn_SQLALCH
             
-        except Exception:
+        except Exception as err:
             self._is_connected = False
             self.conn_SQLALCH = None
-            logger.exception(f"{self.__class__.__name__} Connection to the <{self._database}> database was not sucessful!", terminate=True)      
+            self._connection_issue = err    
 
             
     def disconnect(self):
@@ -250,7 +253,7 @@ class PostgreSQLDatabase(SQLDatabase):
             self.conn_PSYCOPG.close()
             self.conn_SQLALCH.close()
             self._is_connected = False
-            logger.debug(f"<{self._database}> database was disconnected!")
+            self._logger.debug(f"<{self._database}> database was disconnected!")
             
         return self._is_connected
 
@@ -277,20 +280,20 @@ class PostgreSQLDatabase(SQLDatabase):
         
         # check data
         valid, reason = TypeValidator.str(query, reason=True)
-        None if valid else logger.wrong_input(self, "query", query, reason)
+        None if valid else self._logger.wrong_input(self, "query", query, reason)
 
         valid, reason = TypeValidator.bool(err_raise, reason=True)
-        None if valid else logger.wrong_input(self, "err_raise", err_raise, reason)
+        None if valid else self._logger.wrong_input(self, "err_raise", err_raise, reason)
         
         self.connect()
         
         try:
             self.cursor_PSYCOPG.execute(query)
-            logger.debug(f"Following query has been executed: \n <{query}>!")
+            self._logger.debug(f"Following query has been executed: \n <{query}>!")
             return True
         
         except Exception:
-            logger.exception(f"Following query could not been executed: \n <{query}>!", terminate=err_raise)
+            self._logger.exception(f"Following query could not been executed: \n <{query}>!", terminate=err_raise)
             return False
     
     
@@ -315,10 +318,10 @@ class PostgreSQLDatabase(SQLDatabase):
         """ 
         # check data
         valid, reason = TypeValidator.str(query, reason=True)
-        None if valid else logger.wrong_input(self, "query", query, reason)
+        None if valid else self._logger.wrong_input(self, "query", query, reason)
 
         valid, reason = TypeValidator.bool(err_raise, reason=True)
-        None if valid else logger.wrong_input(self, "err_raise", err_raise, reason)
+        None if valid else self._logger.wrong_input(self, "err_raise", err_raise, reason)
         
         self.connect()
 
@@ -328,12 +331,12 @@ class PostgreSQLDatabase(SQLDatabase):
             # get dataframe info
             df_memory = round(df.memory_usage(deep=True).sum()/(1024)**2, 5)
             df_info = f"Downloaded table has {df.shape[0]} rows, {df.shape[1]} columns and takes {df_memory} MB of free space."
-            logger.debug(f"DataFrame from following query has been executed: \n <{query}>! \n {df_info}")    
-            logger.warning(f"DataFrame from query is empty!\n<{query}>") if df.empty else None
+            self._logger.debug(f"DataFrame from following query has been executed: \n <{query}>! \n {df_info}")    
+            self._logger.warning(f"DataFrame from query is empty!\n<{query}>") if df.empty else None
             return df
 
         except Exception:
-            logger.exception(f"Following query has could not been executed: \n <{query}>!", terminate=err_raise)
+            self._logger.exception(f"Following query has could not been executed: \n <{query}>!", terminate=err_raise)
             return False
         
         
@@ -370,28 +373,28 @@ class PostgreSQLDatabase(SQLDatabase):
         
         # check data
         valid, reason = TypeValidator.object(df, class_name="DataFrame", reason=True)
-        None if valid else logger.wrong_input(self, "df", df, reason)
+        None if valid else self._logger.wrong_input(self, "df", df, reason)
         
         valid, reason = TypeValidator.str(table, reason=True)
-        None if valid else logger.wrong_input(self, "table", table, reason)
+        None if valid else self._logger.wrong_input(self, "table", table, reason)
 
         valid, reason = TypeValidator.str(schema, reason=True, none_allowed=True)
-        None if valid else logger.wrong_input(self, "schema", schema, reason)
+        None if valid else self._logger.wrong_input(self, "schema", schema, reason)
 
-        None if if_exists in ["fail", "replace", "append"] else logger.wrong_input(self, "if_exists", if_exists, 'NOT IN AVAILABLE OPTIONS ["fail", "replace", "append"]')
+        None if if_exists in ["fail", "replace", "append"] else self._logger.wrong_input(self, "if_exists", if_exists, 'NOT IN AVAILABLE OPTIONS ["fail", "replace", "append"]')
         
         valid, reason = TypeValidator.bool(err_raise, reason=True)
-        None if valid else logger.wrong_input(self, "err_raise", err_raise, reason)     
+        None if valid else self._logger.wrong_input(self, "err_raise", err_raise, reason)     
         
         self.connect()       
 
         try:
             df.to_sql(name=table, schema=schema, con=self._sqlalch_engine, if_exists=if_exists, method="multi")
-            logger.info(f"DataFrame has been saved into {schema}.{table} in {self._database} database!")            
+            self._logger.info(f"DataFrame has been saved into {schema}.{table} in {self._database} database!")            
             return True
             
         except Exception:
-            logger.exception(f"Unfortunately, it was not possible to save the dataframe! \n {df}", terminate=err_raise)
+            self._logger.exception(f"Unfortunately, it was not possible to save the dataframe! \n {df}", terminate=err_raise)
             return False
         
 # %% NOTES

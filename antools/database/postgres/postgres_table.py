@@ -20,7 +20,7 @@ __date__ = "28/03/2021"
 import pandas as pd
 
 # %% FILE IMPORT
-from antools.logging import logger
+from antools.logging import get_logger
 from antools.database import SQLTable
 from antools.shared import TypeValidator
 
@@ -81,20 +81,20 @@ class PostgreSQLTable(SQLTable):
         self._schema = schema
         self._database = database
         
-        
+        self._logger = get_logger()
         # check table
         valid, reason = TypeValidator.str(self._table, reason=True)
-        None if valid else logger.wrong_input(self, "table", self._table, reason)    
+        None if valid else self._logger.wrong_input(self, "table", self._table, reason)    
         
         # check schema
         valid, reason = TypeValidator.str(self._schema, none_allowed=True, reason=True)
         if not valid:
             valid, reason = TypeValidator.object(self._schema, class_name="PostgreSQLSchema", reason=True)    
-            self._schema = self._schema.schema if valid else logger.wrong_input(self, "schema", self._schema, "NOT AN <PostgreSQLSchema> OBJECT OR STRING")
+            self._schema = self._schema.schema if valid else self._logger.wrong_input(self, "schema", self._schema, "NOT AN <PostgreSQLSchema> OBJECT OR STRING")
         
         # check database
         valid, reason = TypeValidator.object(self._database, class_name="PostgreSQLDatabase", reason=True)
-        None if valid else logger.wrong_input(self, "database", self._database, reason)
+        None if valid else self._logger.wrong_input(self, "database", self._database, reason)
         
         self._full_name = self._schema + "." + self._table if self._schema else self._table
         
@@ -146,7 +146,7 @@ class PostgreSQLTable(SQLTable):
                 splitter = ', ' if (list(columns))[-1] != key else ''
                 selected_columns += key + ' AS ' + value + splitter
         else:
-            logger.wrong_input(self, "columns", columns, "NOT READABLE VARIABLE FOR SQL SELECT COLUMNS QUERY")
+            self._logger.wrong_input(self, "columns", columns, "NOT READABLE VARIABLE FOR SQL SELECT COLUMNS QUERY")
         
         
         # where statement
@@ -158,7 +158,7 @@ class PostgreSQLTable(SQLTable):
         try:
             return self._database.load_dataframe(query)            
         except Exception as err:
-            logger.error(f"DataFrame could not be loaded from {self._full_name} due to: \n{err}")
+            self._logger.error(f"DataFrame could not be loaded from {self._full_name} due to: \n{err}")
 
         
     def update(self):
@@ -198,22 +198,22 @@ class PostgreSQLTable(SQLTable):
                     
         # check data
         valid, reason = TypeValidator.object(df, class_name="DataFrame", reason=True)
-        None if valid else logger.wrong_input(self, "df", df, reason)
+        None if valid else self._logger.wrong_input(self, "df", df, reason)
 
-        None if if_exists in ["fail", "replace", "append"] else logger.wrong_input(self, "if_exists", if_exists, 'NOT IN AVAILABLE OPTIONS ["fail", "replace", "append"]')
+        None if if_exists in ["fail", "replace", "append"] else self._logger.wrong_input(self, "if_exists", if_exists, 'NOT IN AVAILABLE OPTIONS ["fail", "replace", "append"]')
         
         valid, reason = TypeValidator.bool(err_raise, reason=True)
-        None if valid else logger.wrong_input(self, "err_raise", err_raise, reason)     
+        None if valid else self._logger.wrong_input(self, "err_raise", err_raise, reason)     
                 
         self._reconnect()  
 
         try:
             df.to_sql(name=self._table, schema=self._schema, con=self._database._sqlalch_engine, if_exists=if_exists, method="multi")
-            logger.info(f"DataFrame has been saved into {self._full_name} in {self._database} database!")            
+            self._logger.info(f"DataFrame has been saved into {self._full_name} in {self._database} database!")            
             return True
             
         except Exception as err:
-            logger.exception(f"Unfortunately, it was not possible to save the dataframe due to: \n{err}", terminate=err_raise)
+            self._logger.exception(f"Unfortunately, it was not possible to save the dataframe due to: \n{err}", terminate=err_raise)
             return False 
     
     

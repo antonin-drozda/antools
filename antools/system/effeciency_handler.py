@@ -6,7 +6,7 @@ EFFICIENCY HANDLER
 @ project: Anton's Tools
 @ date: 09/04/2021
 
-Logger.
+self._logger.
 """
 
 # %% FILE METADATA
@@ -22,7 +22,7 @@ import time
 import pandas as pd
 
 # %% FILE IMPORT
-from antools.logging import logger
+from antools.logging import get_logger
 
 # %% INPUTS
 
@@ -70,10 +70,13 @@ class EffeciencyHandler():
     @ created: 09/04/2021
     
     """
+    
     TIME_COL = "Time (secs)"
     RAM_COL = "RAM (MB)"
     curr_process = None
     stats = {}  
+    
+    _logger = get_logger()
     
     def __repr__(self):
         return f"{self.__class__.__name__}({list(self.stats)})"
@@ -102,7 +105,7 @@ class EffeciencyHandler():
         """ Finish measuring of current process """
         
         if not self.curr_process:
-            logger.error("Process has not yet started!")
+            self._logger.error("Process has not yet started!")
 
         end_time, end_memory = self._get_time_memory()
         time_diff = round(end_time - self.start_time, 4)
