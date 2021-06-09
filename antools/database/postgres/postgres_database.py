@@ -1,20 +1,9 @@
+# -*- coding: utf-8 -*-
 """
 POSTGRESQL DATABASE CLASS
 
-@ author: Antonín Drozda
-@ organization: Freelancer
-@ project: Anton's Tools
-@ date: 25/03/2021
-
 Connector used for communicating with PostgreSQL database.
 """
-
-# %% FILE METADATA
-__title__ = "POSTGRESQL DATABASE CLASS"
-__author__ = "Antonín Drozda"
-__organization__ = "Freelancer"
-__project__ = "Anton's Tools"
-__date__ = "25/03/2021"
 
 # %% LIBRARY IMPORT
 import psycopg2
@@ -26,8 +15,6 @@ from sqlalchemy import create_engine
 from antools.logging import get_logger
 from antools.database import SQLDatabase
 from antools.shared import TypeValidator
-
-# %% INPUTS
 
 # %% CLASSES
 class PostgreSQLDatabase(SQLDatabase):

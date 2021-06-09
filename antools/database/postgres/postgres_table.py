@@ -1,20 +1,9 @@
+# -*- coding: utf-8 -*-
 """
 POSTGRESQL TABLE CLASS
 
-@ author: Antonín Drozda
-@ organization: Freelancer
-@ project: Anton's Tools
-@ date: 28/03/2021
-
 Class used for generating SQL queries for PostgreSQL Database Class
 """
-
-# %% FILE METADATA
-__title__ = "POSTGRESQL TABLE CLASS"
-__author__ = "Antonín Drozda"
-__organization__ = "Freelancer"
-__project__ = "Anton's Tools"
-__date__ = "28/03/2021"
 
 # %% LIBRARY IMPORT
 import pandas as pd

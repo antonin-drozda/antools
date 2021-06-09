@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 ANTOOLS - ANTON'S TOOLS
 
@@ -11,10 +12,10 @@ ANTOOLS - ANTON'S TOOLS
 @ organization: Freelancer
 
 @ project: Anton's Tools
-@ version: 2021.4.1
+@ version: 2021.4.2
 @ copyright: Copyright (C) 2021 Antonín Drozda
 @ license: MIT
-@ date: 20/04/2021
+@ date: 20.4.2021
 
 Private library which is also free to public use. Its purpose is to be useful code keeper.
 
@@ -32,7 +33,7 @@ __project__ = "Anton's Tools"
 __version__ = "2021.4.2"
 __copyright__ = "Copyright (C) 2021 Antonín Drozda"
 __license__= "MIT"
-__date__ = "20/04/2021"
+__date__ = "20.4.2021"
 __description__ = "Private library which is also free to public use. Its purpose is to be useful code keeper."
 
 

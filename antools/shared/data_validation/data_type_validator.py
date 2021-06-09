@@ -1,20 +1,9 @@
+# -*- coding: utf-8 -*-
 """
 DATA TYPE VALIDATOR
 
-@ author: Antonín Drozda
-@ organization: Freelancer
-@ project: Anton's Tools
-@ date: 28/02/2021
-
 Validator for various data types
 """
-
-# %% FILE METADATA
-__title__ = "DATA TYPE VALIDATOR"
-__author__ = "Antonín Drozda"
-__organization__ = "Freelancer"
-__project__ = "Anton's Tools"
-__date__ = "28/02/2021"
 
 # %% LIBRARY IMPORT
 
@@ -128,5 +117,7 @@ class DataTypeValidator():
     def _check_none(self, input):
         """ TO BE EXTENDED by np.nan, NULL etc. """
         return True if input == None else False 
+
+# %% CREATE INSTANCE
             
 TypeValidator = DataTypeValidator()

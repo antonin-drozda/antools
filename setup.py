@@ -32,7 +32,7 @@ setup(
   classifiers=CLASSIFIERS,
   keywords=ant.KEYWORDS, 
   packages=find_packages(include=["antools", "antools.*"]),
-  python_requires='>=3.6',
+  python_requires='>=3.8',
   install_requires=ant.PACKAGE_DEPENDENCY,
   zip_safe=False
 )

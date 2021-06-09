@@ -1,26 +1,16 @@
+# -*- coding: utf-8 -*-
 """
 PROGRESS BAR CLASS
 
-@ author: Antonín Drozda
-@ organization: Freelancer
-@ project: Anton's Tools
-@ date: 25/03/2021
-
-PROGRESS BAR FOR SHOWING PROGRESS
+Progress Bar for showing progress
 """
-
-# %% FILE METADATA
-__title__ = "PROGRESS BAR CLASS"
-__author__ = "Antonín Drozda"
-__organization__ = "Freelancer"
-__project__ = "Anton's Tools"
-__date__ = "30/03/2021"
 
 # %% LIBRARY IMPORT
 
 # %% FILE IMPORT
 from antools.shared import TypeValidator
 from antools.logging import get_logger
+
 # %% INPUTS
 
 # %% CLASSES

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 ABSTRACT DATABASE CLASS
 
@@ -21,8 +22,6 @@ from abc import ABC, ABCMeta, abstractclassmethod
 import pandas as pd
 
 # %% FILE IMPORT
-
-# %% INPUTS
 
 # %% CLASSES
 

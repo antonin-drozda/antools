@@ -1,20 +1,9 @@
+# -*- coding: utf-8 -*-
 """
 ABSTRACT TABLE CLASS
 
-@ author: Antonín Drozda
-@ organization: Freelancer
-@ project: Anton's Tools
-@ date: 06/04/2021
-
 Class used for generating SQL queries for PostgreSQL Database Class
 """
-
-# %% FILE METADATA
-__title__ = "ABSTRACT TABLE CLASS"
-__author__ = "Antonín Drozda"
-__organization__ = "Freelancer"
-__project__ = "Anton's Tools"
-__date__ = "06/04/2021"
 
 # %% LIBRARY IMPORT
 from abc import ABC, ABCMeta, abstractclassmethod
