@@ -100,13 +100,18 @@ class EffeciencyHandler():
         
         memory_diff = 0 if memory_diff < 0 else memory_diff
         
+
+        
         self.stats[self.curr_process][self.TIME_COL] = time_diff 
         self.stats[self.curr_process][self.RAM_COL] = memory_diff
         
         if print_results:
             print(f"Process <{self.curr_process}> took {time_diff} seconds to execute!")
             print(f"Memory usage was {memory_diff} MB!")
-            
+        
+        if memory_diff == 0:
+            print("It seems Memory usage is unmeasurable.")
+            print("This is caused by insignificant memory usage or non equal starting variables! Please, review the process!")
         self.curr_process = None
 
 
