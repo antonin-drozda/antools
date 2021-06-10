@@ -112,16 +112,24 @@ class EffeciencyHandler():
         if memory_diff == 0:
             print("It seems Memory usage is unmeasurable.")
             print("This is caused by insignificant memory usage or non equal starting variables! Please, review the process!")
+            
         self.curr_process = None
 
 
-    def get_stats(self) -> pd.DataFrame:
+    def get_stats(self, sort_by:str = "time") -> pd.DataFrame:
         """ Returns pd.DataFrame with all processed and its data """
         
         # automaticall finish previous process
         if self.curr_process:
             self.finish()
-            
+        
+        if sort_by == "time":
+            pass
+        elif sort_by == "ram":
+            pass
+        else:
+            pass
+        
         df = pd.DataFrame(data=self.stats).transpose().sort_values(by=[self.TIME_COL], ascending=True)
         mins_dict = df.idxmin().to_dict()
         
