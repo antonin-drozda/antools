@@ -12,10 +12,10 @@ ANTOOLS - ANTON'S TOOLS
 @ organization: Freelancer
 
 @ project: Anton's Tools
-@ version: 2021.4.2
+@ version: 2021.6.0
 @ copyright: Copyright (C) 2021 Antonín Drozda
 @ license: MIT
-@ date: 20.4.2021
+@ date: 18.6.2021
 
 Private library which is also free to public use. Its purpose is to be useful code keeper.
 
@@ -30,10 +30,10 @@ __url__ = "https://github.com/antonin-drozda"
 __organization__ = "Freelancer"
 
 __project__ = "Anton's Tools"
-__version__ = "2021.4.2"
+__version__ = "2021.6.0"
 __copyright__ = "Copyright (C) 2021 Antonín Drozda"
 __license__= "MIT"
-__date__ = "20.4.2021"
+__date__ = "18.6.2021"
 __description__ = "Private library which is also free to public use. Its purpose is to be useful code keeper."
 
 
@@ -44,6 +44,6 @@ PACKAGE_DEPENDENCY = ['pandas >= 1.2.2',
 
 KEYWORDS = ['antools', 
             'database', 'postgres', 
-            'logger', 'logging', 
+            'logger', 'logging', 'progress', 
             'data science', 'data validation', 
             'system']

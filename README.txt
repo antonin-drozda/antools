@@ -3,25 +3,43 @@
 ## Overview
 ### Private library which is also free to public use. Its purpose is to be useful code keeper.
 
-Anton's Tools package contains methods for
-* data science - data validators
-* databases -  connector to PostgreSQL enabling executing queries, loading and saving pd.DataFrame
-* loggers - connector for interactive logging in Windows OS
+Anton's Tools package contains of following modules:
+
+Database
+* supports PostgreSQL database
+* loading and saving pandas.DataFrame
+* executing queries
+
+Logging
+* supports Windows OS
+* customizable scalable logger
+* ProgressBar
+
+System
+* EffeciencyHandler - measures time and memory effeciency of various approaches to one task
+
+Shared
+* DataTypeValidator for advanced checking of data types and its characteristics (in Progress)
+
 
 ## Getting Started
 ### Dependencies
 The antools package utilizes following libraries:
 
-Data Science:
-* none
-
-Databases:
+Database:
 * pandas
 * psycopg2
 * sqlalchemy
+* getpass
 
-Loggers:
-* none
+Logging:
+* all in Python Core
+
+System:
+* all in Python Core
+
+Shared:
+* all in Python Core
 
 ### Package Installation
 Installable using pip. Execute:

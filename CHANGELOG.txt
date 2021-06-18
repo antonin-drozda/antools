@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+2021.6.0 (18/06/2021)
+-------------------
+- Added EffeciencyHandler for system module
+- DataValidator is still in TrialMode
+- New ReadMe format
+
 2021.4.2 (06/04/2021)
 -------------------
 - COMPLETE REWORK (2021.4.1 - HOTFIX)
@@ -14,7 +20,7 @@ Change Log
 
 2021.3.0 (01/03/2021)
 -------------------
-- DataTypeValidator has been Added
+- DataTypeValidator has been added
 - Logger folder system has been reworked
 - WindowsBaseLogger can be now implemented into PostgreSQLConnector
 
