@@ -65,7 +65,7 @@ if /i "%CONFIRM%"=="y" (
     echo Upload canceled. Please check your package before publishing.
 )
 
-set /p CONFIRM="Do you want to push to GitHub? (y/N): "
+set /p CONFIRM="Do you want to create commit to Git? (y/N): "
 
 if /i "%CONFIRM%"=="y" (
 
@@ -81,14 +81,14 @@ if /i "%CONFIRM%"=="y" (
     echo Updated requirements.txt!
 
     :: Commit and push to Git
-    echo Creaeting Git commit ...
+    echo Creating Git commit ...
     git add .
     git commit -m "Published antools v!VERSION!"
 
     echo Please push manually ... currently working via GitHubDesktop
 
 ) else (
-echo Not pushed via GIT
+echo GIT commit not created
 )
 
 
