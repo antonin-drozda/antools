@@ -81,16 +81,15 @@ if /i "%CONFIRM%"=="y" (
     echo Updated requirements.txt!
 
     :: Commit and push to Git
-    echo Committing and pushing to Git...
+    echo Creaeting Git commit ...
     git add .
     git commit -m "Published antools v!VERSION!"
-    git push origin main
+
+    echo Please push manually ... currently working via GitHubDesktop
 
 ) else (
 echo Not pushed via GIT
 )
-
-
 
 
 endlocal
