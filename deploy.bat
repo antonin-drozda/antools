@@ -51,7 +51,7 @@ if exist %LIB_PATH% (
 
 
 :: Ask user for confirmation before uploading
-set /p CONFIRM="Is everything correct? Do you want to publish? (y/N): "
+set /p CONFIRM="Do you want to publish to Pypi? (y/N): "
 
 if /i "%CONFIRM%"=="y" (
 
@@ -61,25 +61,36 @@ if /i "%CONFIRM%"=="y" (
 
     echo Deployment completed!
 
-    :: Get antools version dynamically
-    for /f %%i in ('python -c "import antools; print(antools.__version__)"') do set VERSION=%%i
-
-    :: remove antools and do pip freeze 
-    pip uninstall -y antools
-    pip freeze > requirements.txt¨
-    echo pip freeze > requirements.txt!
-
-    :: commit and push to Git
-    echo Committing and pushing to Git...
-    git add .
-    git commit -m "Published antools v%VERSION%"
-    git push origin main
-
-    echo Git push completed!
-
-
 ) else (
     echo Upload canceled. Please check your package before publishing.
 )
+
+set /p CONFIRM="Do you want to push to GitHub? (y/N): "
+
+if /i "%CONFIRM%"=="y" (
+
+    :: Get antools version dynamically
+    for /f %%i in ('python -c "import antools; print(antools.__version__)"') do (
+        set VERSION=%%i
+    )
+    echo Detected antools version: !VERSION!
+
+    :: Remove antools and update requirements.txt
+    pip uninstall -y antools
+    pip freeze > requirements.txt
+    echo Updated requirements.txt!
+
+    :: Commit and push to Git
+    echo Committing and pushing to Git...
+    git add .
+    git commit -m "Published antools v!VERSION!"
+    git push origin main
+
+) else (
+echo Not pushed via GIT
+)
+
+
+
 
 endlocal
