@@ -85,8 +85,7 @@ if /i "%CONFIRM%"=="y" (
     echo Creating Git commit ...
     git add .
     git commit -m "Published antools v!VERSION!"
-
-    echo Please push manually ... currently working via GitHubDesktop
+    git push
 
 ) else (
 echo GIT commit not created
