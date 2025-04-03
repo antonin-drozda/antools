@@ -69,13 +69,9 @@ echo Old Poetry builds removed and Poetry cache cleared.
 :: Ask user for confirmation before uploading
 set /p CONFIRM="Do you want to publish to PyPI? (y/N): "
 
-:: Check if the user confirmed with 'y' or 'Y'
 if /i "%CONFIRM%"=="y" (
-
     :: Upload to PyPI using Poetry's built-in publish command
     echo Uploading package to PyPI...
-
-    :: Use Poetry to publish
     poetry publish --build
 
     :: Open the URL in the default browser
@@ -97,14 +93,14 @@ if /i "%CONFIRM%"=="y" (
     echo Upload canceled. Please check your package before publishing.
 )
 
+:: Ask user for confirmation to commit to Git
 set /p CONFIRM="Do you want to create commit to Git? (y/N): "
 
 if /i "%CONFIRM%"=="y" (
-
     :: Get library version dynamically
     cd dist
 
-    :: Get the first .whl or .tar.gz file (assuming only one file is generated)
+    :: Find the first .whl or .tar.gz file
     for %%f in (*.whl *.tar.gz) do (
         set "package_file=%%f"
         goto :found
@@ -112,12 +108,16 @@ if /i "%CONFIRM%"=="y" (
 
     :found
     :: Extract the version number from the filename (e.g., "your_package-0.1.0-py3-none-any.whl")
-    for /f "tokens=2 delims=-" %%v in ("%package_file%") do (
+    for /f "tokens=2 delims=-" %%v in ("!package_file!") do (
         set "version=%%v"
+        goto :done
     )
 
-    :: Display the version (or use it further in your script)
-    echo Version: %version%
+    :done
+    :: Display the extracted version
+    echo Version: !version!
+
+    :: Return to the original script directory
     cd /d "%~dp0"
 
     :: Remove library and update requirements.txt
@@ -125,21 +125,25 @@ if /i "%CONFIRM%"=="y" (
     pip freeze > requirements.txt
     echo Updated requirements.txt!
 
-   :: Commit and push to Git
+    :: Commit and push to Git
     echo Creating Git commit ...
     git add .
     git commit -m "published %LIBRARY_NAME% v !version!"
     git push
+    echo Commit successfully pushed to GitHub.
 
-    :: Open the GitHub repository URL dynamically with the LIBRARY_NAME
+    :: Open the GitHub repository URL dynamically
     start https://github.com/antonin-drozda/%LIBRARY_NAME%
 
     :: Inform user to check if the branch was pushed
-    echo Check that the branch was pushed
-        
+    echo Check that the branch was pushed.
+
+    :: Pause to view output (optional)
+    pause
 
 ) else (
-    echo GIT commit not created
+    echo GIT commit not created.
 )
 
+:: End of script
 endlocal

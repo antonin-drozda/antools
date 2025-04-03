@@ -1,9 +1,7 @@
-echo If not working, call: poetry config pypi-token.pypi YOUR_TOKEN
-
-:: Open the URL in the default browser
-start https://pypi.org/project/antools/#history
-
-poetry publish --build
-
-pause
-
+set /p CONFIRM="Do you want to create commit to Git? (y/N): "
+if /i "%CONFIRM%"=="y" (
+    :: Get library version dynamically
+    echo Cau
+) else (
+    echo Ahoj
+)
