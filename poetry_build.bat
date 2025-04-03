@@ -48,6 +48,7 @@ set /p CONFIRM="Do you want to publish to Pypi and push to Git? (y/N): "
 
 if /i "%CONFIRM%"=="y" (
 
+
     :: Get antools version dynamically
     for /f %%i in ('python -c "import antools; print(antools.__version__)"') do (
         set VERSION=%%i
@@ -62,7 +63,17 @@ if /i "%CONFIRM%"=="y" (
     :: Commit and push to Git
     echo Creating Git commit ...
     git add .
-    git commit -m "Published antools v!VERSION!"
+    git commit -m "published antools v!VERSION!"
+    git push
+
+    :: Open the GitHub repository URL dynamically
+    start https://github.com/antonin-drozda/%LIBRARY_NAME%
+
+    :: Inform user to check if the branch was pushed
+    echo Check that the branch was pushed.
+
+    :: Pause to view output (optional)
+    pause
 
     echo Please push manually ... currently working via GitHubDesktop
 
