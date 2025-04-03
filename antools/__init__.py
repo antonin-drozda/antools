@@ -30,7 +30,7 @@ __url__ = "https://github.com/antonin-drozda"
 __organization__ = "Freelancer"
 
 __project__ = "Anton's Tools"
-__version__ = "2025.4.8"
+__version__ = "2025.5.0"
 __copyright__ = "Copyright (C) 2025 Antonin Drozda"
 __license__= "MIT"
 __date__ = "1.4.2025"
