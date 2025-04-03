@@ -14,6 +14,29 @@ set VENV_DIR=venv
 set /p CONFIRM="Do you want to publish to PyPI and push to Git? (y/N): "
 
 if /i "%CONFIRM%"=="y" (
+
+    :: Build the package
+    echo Building the package...
+    poetry build
+
+    :: Install package locally for testing
+    echo Installing the package locally for testing...
+    pip uninstall -y %LIBRARY_NAME%
+    pip install .
+
+    :: Open installed library in venv (if it exists)
+    set LIB_PATH="%VENV_DIR%\Lib\site-packages\%LIBRARY_NAME%"
+    if exist %LIB_PATH% (
+        echo Opening installed library folder...
+        explorer %LIB_PATH%
+    ) else (
+        echo WARNING: Library folder not found inside venv.
+    )
+
+    :: Upload to PyPI using Poetry's built-in publish command
+    echo Uploading package to PyPI...
+    poetry publish --build
+
     
     :: Open the URL in the default browser
     start https://pypi.org/project/%LIBRARY_NAME%/#history
