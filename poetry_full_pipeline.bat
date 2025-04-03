@@ -30,8 +30,11 @@ pip install poetry
 poetry init
 poetry install
 
-:: Remove all files in the dist/ directory
-del /Q dist\*
+:: Ensure dist/ directory is clean before build
+if exist dist\* (
+    echo Cleaning up old build files...
+    del /Q dist\*
+)
 
 :: Optional: Clear the Poetry cache (remove old cached packages)
 poetry cache clear pypi --all
@@ -56,15 +59,6 @@ if exist %LIB_PATH% (
 ) else (
     echo WARNING: Library folder not found inside venv.
 )
-
-:: Remove all files in the dist/ directory
-del /Q dist\*
-
-:: Optional: Clear the Poetry cache (remove old cached packages)
-poetry cache clear pypi --all
-
-:: Optionally, you can add a message or pause to indicate completion
-echo Old Poetry builds removed and Poetry cache cleared.
 
 :: Ask user for confirmation before uploading
 set /p CONFIRM="Do you want to publish to PyPI? (y/N): "
@@ -97,10 +91,10 @@ if /i "%CONFIRM%"=="y" (
 set /p CONFIRM="Do you want to create commit to Git? (y/N): "
 
 if /i "%CONFIRM%"=="y" (
-    :: Get library version dynamically
+    :: Get library version dynamically from the first file found in dist/
     cd dist
 
-    :: Find the first .whl or .tar.gz file
+    :: Find the first .whl or .tar.gz file (assuming only one file will be processed)
     for %%f in (*.whl *.tar.gz) do (
         set "package_file=%%f"
         goto :found
@@ -143,6 +137,7 @@ if /i "%CONFIRM%"=="y" (
 
 ) else (
     echo GIT commit not created.
+    echo No changes were committed to GitHub.
 )
 
 :: End of script
