@@ -12,12 +12,12 @@ ANTOOLS - ANTON'S TOOLS
 @ organization: Freelancer
 
 @ project: Anton's Tools
-@ version: 2025.1.0
+@ version: 2025.4.0
 @ copyright: Copyright (C) 2025 Antonín Drozda
 @ license: MIT
-@ date: 30.1.2022
+@ date: 1.4.2025
 
-Private library which is also free to public use. Its purpose is to be useful code keeper.
+Private library which is also free to public use. Its purpose is to be useful code keeper and template for various automation projects.
 
 """
 
@@ -30,11 +30,11 @@ __url__ = "https://github.com/antonin-drozda"
 __organization__ = "Freelancer"
 
 __project__ = "Anton's Tools"
-__version__ = "2025.4.0"
+__version__ = "2025.4.8"
 __copyright__ = "Copyright (C) 2025 Antonin Drozda"
 __license__= "MIT"
-__date__ = "30.3.2022"
-__description__ = "Private library which is also free to public use. Its purpose is to be useful code keeper."
+__date__ = "1.4.2025"
+__description__ = "Private library which is also free to public use. Its purpose is to be useful code keeper and template for various automation projects."
 
 
 # %% ADDITIONAL PYPI METADATA

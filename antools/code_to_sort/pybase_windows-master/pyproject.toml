@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "pybase_windows"
+version = "0.1.0"
+description = "Here belongs description of the project ... "
+authors = ["Antonín Drozda <adrozda.dev@gmail.cz>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.12"
+pyinstaller = "^5.7.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

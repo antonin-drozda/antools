@@ -57,6 +57,7 @@ if /i "%CONFIRM%"=="y" (
 
     :: Upload to PyPI using Twine
     echo Uploading package to PyPI...
+    echo Can be found in BitWarden for PyPI. Paste with shift+ctrl+v!
     twine upload dist\*
 
     echo Deployment completed!
