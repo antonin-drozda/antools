@@ -48,6 +48,24 @@ set /p CONFIRM="Do you want to publish to Pypi and push to Git? (y/N): "
 
 if /i "%CONFIRM%"=="y" (
 
+    :: Upload to PyPI using Poetry's built-in publish command
+    echo Uploading package to PyPI...
+    poetry publish --build
+
+    :: Open the URL in the default browser
+    start https://pypi.org/project/%LIBRARY_NAME%/#history
+
+    :: Inform the user about checking the upload
+    echo Check that package was uploaded correctly.
+
+    :: Pause to view output (optional)
+    pause
+
+    :: Provide additional help if the user needs to set the token
+    echo If not working, call: poetry config pypi-token.pypi YOUR_TOKEN
+
+    :: Inform about deployment completion
+    echo Deployment completed!
 
     :: Get antools version dynamically
     for /f %%i in ('python -c "import antools; print(antools.__version__)"') do (
@@ -74,8 +92,6 @@ if /i "%CONFIRM%"=="y" (
 
     :: Pause to view output (optional)
     pause
-
-    echo Please push manually ... currently working via GitHubDesktop
 
 ) else (
 echo GIT commit not created
