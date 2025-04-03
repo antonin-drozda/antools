@@ -1,6 +1,6 @@
 [project]
 name = "antools"
-version = "2.2.3"
+version = "2.8.3"
 description = ""
 authors = [
     {name = "Antonín Drozda",email = "adrozda.dev@gmail.com"}
