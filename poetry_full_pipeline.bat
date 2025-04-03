@@ -57,6 +57,15 @@ if exist %LIB_PATH% (
     echo WARNING: Library folder not found inside venv.
 )
 
+:: Remove all files in the dist/ directory
+del /Q dist\*
+
+:: Optional: Clear the Poetry cache (remove old cached packages)
+poetry cache clear pypi --all
+
+:: Optionally, you can add a message or pause to indicate completion
+echo Old Poetry builds removed and Poetry cache cleared.
+
 :: Ask user for confirmation before uploading
 set /p CONFIRM="Do you want to publish to PyPI? (y/N): "
 
@@ -127,7 +136,6 @@ if /i "%CONFIRM%"=="y" (
 
     :: Inform user to check if the branch was pushed
     echo Check that the branch was pushed
-    pause
         
 
 ) else (
