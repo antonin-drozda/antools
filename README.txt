@@ -10,20 +10,26 @@ TBD
 
 ## Getting Started
 ### Dependencies
-The antools package utilizes following libraries:
+The antools package utilizes following libraries, but they are installed by utility packages separately.
 
 *TBD
 
-### Package Installation
+### Correct ackage Installation
 Installable using pip. Execute:
 ```
-pip install antools
+pip install poetry
+poetry init
+poetry add antools
 ```
 
-For creation of automation template, execute following:
+For correct initialization of new project, execute following:
 ```
-
 python -m antools init
+```
+
+For correct installation of dependency, execute following:
+```
+python -m antools install UTILITY_NAME
 ```
 
 

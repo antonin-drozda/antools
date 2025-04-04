@@ -1,0 +1,22 @@
+repos:
+  - repo: https://github.com/psf/black
+    rev: 22.3.0
+    hooks:
+      - id: black
+        exclude: ^antools/core/unsorted_code/.*  # Exclude the entire folder
+
+  - repo: https://github.com/PyCQA/pylint
+    rev: v3.3.6
+    hooks:
+      - id: pylint
+        exclude: ^antools/core/unsorted_code/.*  # Exclude the entire folder
+
+  - repo: https://github.com/PyCQA/isort
+    rev: 6.0.1  # Specify the version or use a tag
+    hooks:
+      - id: isort
+        name: isort (Python import sorter)
+        args:
+          - --profile
+          - black  # Use the Black style for sorting imports
+        exclude: ^antools/core/unsorted_code/.*  # Exclude the entire folder

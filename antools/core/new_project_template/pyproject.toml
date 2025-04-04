@@ -1,9 +1,8 @@
 [project]
-name = "antools"
-description = "Private library which is also free to public use. Its purpose is to be useful code keeper and template for various automation projects."
-version = "2020.0.2"
+name = "MY PROJECT"
+description = "DESCRIPTION"
+version = "2025.8.8"
 dependencies = [
-    "setuptools (>=78.1.0,<79.0.0)",
     "pre-commit (>=4.2.0,<5.0.0)"
 ]
 requires-python = ">=3.13,<4.0"

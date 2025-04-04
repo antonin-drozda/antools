@@ -1,51 +1,80 @@
-import sys
+"""
+Main module for antools. This script serves as the entry point for the antools package.
+It contains the main execution logic or imports for running the package.
+"""
+
+import importlib.util
 import os
 import shutil
-import importlib.util
+import subprocess
+import sys
 
-def get_package_subfolder(subfolder_name):
-    """Finds the path of a specific subfolder inside the antools package."""
-    spec = importlib.util.find_spec("antools")
-    if not spec or not spec.origin:
-        return None
-
-    package_path = os.path.dirname(spec.origin)
-    subfolder_path = os.path.join(package_path, subfolder_name)
-
-    return subfolder_path if os.path.exists(subfolder_path) else None
 
 def init():
     """Copies all files and subdirectories from a automation_template folder inside antools to the current working directory."""
-    subfolder_name = "automation_template"  # Change this to the folder inside antools
-    source_path = get_package_subfolder(subfolder_name)
-    
-    if not source_path:
-        print(f"Error: Could not find the folder '{subfolder_name}' inside antools.")
+
+    spec = importlib.util.find_spec("antools")
+    if not spec or not spec.origin:
+        print("Antools library was not found!")
+        return
+
+    package_path = os.path.dirname(spec.origin)
+    source_path = os.path.join(package_path, "core", "new_project_template")
+
+    if not os.path.exists(source_path):
+        print(f"Error: Could not find the folder '{source_path}' inside antools.")
         return
 
     dest_path = os.getcwd()  # Copy contents to the current working directory
 
+    print(f"Copying contents from {source_path} to {dest_path}...")
+
+    for item in os.listdir(source_path):
+        src_item = os.path.join(source_path, item)
+        dest_item = os.path.join(dest_path, item)
+
+        if os.path.isdir(src_item):
+            shutil.copytree(src_item, dest_item, dirs_exist_ok=True)
+        else:
+            shutil.copy2(src_item, dest_item)
+
+    batch_file_path = os.path.join(
+        os.path.dirname(__file__),
+        "core",
+        "new_project_template",
+        "bin",
+        "initialize.bat",
+    )
+    # Run the batch file
     try:
-        print(f"Copying contents from {source_path} to {dest_path}...")
+        # subprocess.run() to execute the batch file
+        result = subprocess.run(
+            [batch_file_path], shell=True, text=True, capture_output=True, check=True
+        )
 
-        for item in os.listdir(source_path):
-            src_item = os.path.join(source_path, item)
-            dest_item = os.path.join(dest_path, item)
+        # Print the output (standard output and error)
+        print("STDOUT:", result.stdout)
+        print("STDERR:", result.stderr)
 
-            if os.path.isdir(src_item):
-                shutil.copytree(src_item, dest_item, dirs_exist_ok=True)
-            else:
-                shutil.copy2(src_item, dest_item)
+        # Check for success or failure
+        if result.returncode == 0:
+            print("Batch file executed successfully.")
+        else:
+            print("Error running the batch file.")
 
-        print("Initialization complete!")
     except Exception as e:
-        print(f"Error during initialization: {e}")
+        print(f"An error occurred: {e}")
+
+    print("Initialization complete!")
+
 
 def main():
+    """Enable to run python -m antools commands"""
     if len(sys.argv) > 1 and sys.argv[1] == "init":
         init()
     else:
-        print("Usage: python -m antools init")
+        print("Usages: python -m antools init (To start new project)")
+
 
 if __name__ == "__main__":
     main()
