@@ -38,13 +38,7 @@ def init():
         else:
             shutil.copy2(src_item, dest_item)
 
-    batch_file_path = os.path.join(
-        os.path.dirname(__file__),
-        "core",
-        "new_project_template",
-        "bin",
-        "initialize.bat",
-    )
+    batch_file_path = os.path.join(os.path.dirname(__file__), "initialize.bat")
     # Run the batch file
     try:
         # subprocess.run() to execute the batch file

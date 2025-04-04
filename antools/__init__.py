@@ -12,7 +12,7 @@ ANTOOLS - ANTON'S TOOLS
 @ organization: Freelancer
 
 @ project: Anton's Tools
-@ version: 2020.0.2
+@ version: 2020.0.3
 @ copyright: Copyright (C) 2025 Antonín Drozda
 @ license: MIT
 @ date: 4.4.2025
@@ -30,7 +30,7 @@ __url__ = "https://github.com/antonin-drozda"
 __organization__ = "Freelancer"
 
 __project__ = "Anton's Tools"
-__version__ = "2020.0.2"
+__version__ = "2020.0.3"
 __copyright__ = "Copyright (C) 2025 Antonin Drozda"
 __license__ = "MIT"
 __date__ = "4.4.2025"

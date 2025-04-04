@@ -1,9 +1,8 @@
 [project]
-name = "MY PROJECT"
+name = "NEW_PROJECT"
 description = "DESCRIPTION"
-version = "2025.8.8"
+version = "2025.1.0"
 dependencies = [
-    "pre-commit (>=4.2.0,<5.0.0)"
 ]
 requires-python = ">=3.13,<4.0"
 authors = [
@@ -15,7 +14,7 @@ maintainers = [
 packages = [{ include = "antools" }]
 readme = "README.md"
 license = "MIT"
-keywords = ["antools"]
+keywords = ["NEW_PROJECT"]
 classifiers = [
     'Framework :: IDLE',
     'Topic :: Utilities',
