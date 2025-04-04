@@ -29,6 +29,7 @@ echo Installing required libraries...
 pip install poetry
 poetry init
 poetry install
+poetry add setuptools
 
 pip freeze > requirements.txt
 echo pip freeze to requirements.txt

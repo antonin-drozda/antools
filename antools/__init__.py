@@ -30,11 +30,25 @@ __url__ = "https://github.com/antonin-drozda"
 __organization__ = "Freelancer"
 
 __project__ = "Anton's Tools"
-__version__ = "2025.5.0"
+__version__ = "2025.8.8"
 __copyright__ = "Copyright (C) 2025 Antonin Drozda"
 __license__= "MIT"
 __date__ = "1.4.2025"
 __description__ = "Private library which is also free to public use. Its purpose is to be useful code keeper and template for various automation projects."
+
+CLASSIFIERS = [
+    'Framework :: IDLE',
+    'Topic :: Utilities',
+    'Development Status :: 3 - Alpha',
+    'License :: OSI Approved :: MIT License',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.13',
+    'Operating System :: OS Independent',
+    'Environment :: Plugins',
+    'Intended Audience :: Developers',
+    'Intended Audience :: Education',
+    'Natural Language :: English',
+]
 
 
 # %% ADDITIONAL PYPI METADATA

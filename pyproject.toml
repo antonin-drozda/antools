@@ -1,15 +1,38 @@
 [project]
 name = "antools"
-version = "2025.5.0"
-description = "My project"
-authors = [
-    {name = "Antonín Drozda",email = "adrozda.dev@gmail.com"}
-]
-readme = "README.md"
-requires-python = ">=3.13"
+description = "Private library which is also free to public use. Its purpose is to be useful code keeper and template for various automation projects."
+version = "2025.8.8"
 dependencies = [
 ]
+requires-python = ">=3.13"
+authors = [
+  {name = "Antonin Drozda", email = "adrozda.dev@gmail.com"}
+]
+maintainers = [
+  {name = "Antonin Drozda", email = "adrozda.dev@gmail.com"}
+]
+packages = [{ include = "antools" }]
+readme = "README.md"
+license = "MIT"
+keywords = ["antools"]
+classifiers = [
+    'Framework :: IDLE',
+    'Topic :: Utilities',
+    'Development Status :: 3 - Alpha',
+    'License :: OSI Approved :: MIT License',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.13',
+    'Operating System :: OS Independent',
+    'Environment :: Plugins',
+    'Intended Audience :: Developers',
+    'Intended Audience :: Education',
+    'Natural Language :: English',
+]
 
+[project.urls]
+Homepage = "https://github.com/antonin-drozda/antools"
+Repository = "https://github.com/antonin-drozda/antools"
+Changelog = "https://github.com/antonin-drozda/antools/CHANGELOG.txt"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
